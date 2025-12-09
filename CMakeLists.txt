@@ -14,6 +14,8 @@ set(CMAKE_C_STANDARD 11)
 
 set(COMMON_SOURCES
     src/main.c
+    src/include/utils.c
+    src/matrix/matrix_inverse.c
     )
 
 add_compile_definitions(
