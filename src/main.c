@@ -1,24 +1,51 @@
 #include <stdio.h>
 #include "include/commons.h"
+#include <time.h>
 #include "matrix/matrix.h"
 
 int main() {
     printf("Hello, EM Clustering!\n");
 
-    float **example_matrix = alloc_matrix(3);
-    example_matrix[0][0] = 4; example_matrix[0][1] = 7; example_matrix[0][2] = 1;
-    example_matrix[1][0] = 2; example_matrix[1][1] = 6; example_matrix[1][2] = 3;
-    example_matrix[2][0] = 5; example_matrix[2][1] = 8; example_matrix[2][2] = 9;
+    int dim = 200;
+
+    float **example_matrix = alloc_matrix(dim);
+    for(int i = 0; i < dim; i++)
+        for(int j = 0; j < dim; j++)
+            example_matrix[i][j] = (i == j) ? 2.0f : 1.0f;
+   
 
     print_matrix(example_matrix, 3);
 
-    float **inverse_matrix = alloc_matrix(3);
-    if (invert_matrix(example_matrix, 3, inverse_matrix) == 0) {
-        printf("Inverse matrix:\n");
+    float **inverse_matrix = alloc_matrix(dim);
+
+    clock_t start, end;
+    double elapsed;
+
+    // printf("Inverting matrix of dimension %d x %d\n", dim, dim);
+    // start = clock();
+    // int r1 = invert_matrix(example_matrix, dim, inverse_matrix);
+    // end = clock();
+    // elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    // if (r1 == 0) {
+    //     printf("Inverse matrix:\n");
+    //     print_matrix(inverse_matrix, 3);
+    // } else {
+    //     printf("Matrix is singular and cannot be inverted.\n");
+    // }
+    // printf("invert_matrix time: %.6f sec\n", elapsed);
+
+    printf("\nNow using LU decomposition method:\n");
+    start = clock();
+    int r2 = invert_matrix(example_matrix, dim, inverse_matrix);
+    end = clock();
+    elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    if (r2 == 0) {
+        printf("Inverse matrix (LU):\n");
         print_matrix(inverse_matrix, 3);
     } else {
         printf("Matrix is singular and cannot be inverted.\n");
     }
+    printf("invert_matrix_lu time: %.6f sec\n", elapsed);
 
     return 0;
 }
