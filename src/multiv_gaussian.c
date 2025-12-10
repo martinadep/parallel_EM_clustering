@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 #include "include/commons.h"
 #include "matrix/matrix.h"
 
-T multiv_gaussian_pdf(T* x, int dim, T* means, T** cov_matrix) {
+T single_multiv_gaussian_pdf(T* x, int dim, T* means, T** cov_matrix) {
 
     // (x - mean)
     T* diff = malloc(dim * sizeof(T));

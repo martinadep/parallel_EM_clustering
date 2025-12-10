@@ -17,6 +17,7 @@ set(COMMON_SOURCES
     src/include/utils.c
     src/matrix/matrix_inverse_lu.c
     src/matrix/matrix_utils.c
+    src/multiv_gaussian.c
     # src/matrix/matrix_inverse.c
     )
 
