@@ -3,8 +3,9 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "commons.h"
-#include "../matrix/matrix_utils.h"
+#include "include/matrix_utils.h"
+#include "include/utils.h"
+#include "include/commons.h"
 
 T** load_csv(const char* filename, int* num_rows, int* num_cols) {
     FILE* file = fopen(filename, "r");
@@ -57,7 +58,6 @@ T** load_csv(const char* filename, int* num_rows, int* num_cols) {
             data[i][j] = (T)atof(token);
             token = strtok(NULL, ",\n");
         }
-        /* remaining tokens (e.g. labels) are ignored */
     }
 
     fclose(file);

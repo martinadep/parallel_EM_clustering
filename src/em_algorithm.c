@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "matrix/matrix_utils.h"
+#include "include/matrix_utils.h"
 #include "include/commons.h"
 
 void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
@@ -42,29 +42,12 @@ void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
     }
 }
 
+
 void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
     for(int k = 0; k < num_clusters; k++){
-        
         // Update weights
-        // gmm[k].weight = N_k / num_data_points;
         gmm[k].weight = gmm[k].class_resp / num_data_points;
 
-        // T N_k = 0.0;
-
-        // // Calculate number of effective points assigned to cluster k
-        // // if every point is fully assigned to cluster k (resp = 1.0), N_k = number of points in that cluster
-        // for(int n = 0; n < num_data_points; n++){
-        //     N_k += resp[n][k];
-        // }
-
-        // Update means
-        // for(int d = 0; d < dim; d++){
-        //     gmm[k].mean[d] = 0.0;
-        //     for(int n = 0; n < num_data_points; n++){
-        //         gmm[k].mean[d] += resp[n][k] * data_points[n][d];
-        //     }
-        //     gmm[k].mean[d] /= N_k;
-        // }
         // update means
         for (int d = 0; d < dim; d++){
             gmm[k].mean[d] = 0.0;

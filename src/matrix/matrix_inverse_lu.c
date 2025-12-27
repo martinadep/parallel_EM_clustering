@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "../include/commons.h"   
-#include "matrix_utils.h"
+#include "../include/matrix_utils.h"
 
 /* -------------------------------------------------------------
    LUP decomposition: A = P * L * U

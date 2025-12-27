@@ -5,7 +5,8 @@
 #include <time.h>
 #include <string.h>
 #include "include/commons.h"
-#include "matrix/matrix_utils.h"
+#include "include/matrix_utils.h"
+#include "include/utils.h"
 
 int main() {
     int N, dim, K = 3;

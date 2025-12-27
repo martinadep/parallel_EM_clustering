@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix_utils.h"
+#include "../include/matrix_utils.h"
 #include "../include/commons.h"
 
 /*

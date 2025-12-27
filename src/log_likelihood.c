@@ -1,8 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-#include "matrix/matrix_utils.h"
 #include "include/commons.h"
 
 T log_likelihood(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters) {
