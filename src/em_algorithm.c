@@ -17,26 +17,27 @@ void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
     //     }
     // }
 
-    for(int n = 0; n < num_data_points; n++){ 
+    for(int k = 0; k < num_clusters; k++){
+        gmm[k].class_resp = 0.0;
+    }
+
+    for(int i = 0; i < num_data_points; i++){ 
         T norm = 0.0;
         // unnormalized responsibility
         for(int k = 0; k < num_clusters; k++){
-            T pdf = multiv_gaussian_pdf(data_points[n], dim, gmm[k].mean, gmm[k].cov); 
-            resp[n][k] = gmm[k].weight * pdf;
-            norm += resp[n][k];
+            T pdf = multiv_gaussian_pdf(data_points[i], dim, gmm[k].mean, gmm[k].cov); 
+            resp[i][k] = gmm[k].weight * pdf;
+            norm += resp[i][k];
         }
 
         // normalized responsibility
         for(int k = 0; k < num_clusters; k++){ 
-            resp[n][k] /= norm;
+            resp[i][k] /= norm;
         }
 
         // class responsibility
         for(int k = 0; k < num_clusters; k++){
-            gmm[k].class_resp = 0.0;
-            for(int i = 0; i < num_data_points; i++){
-                gmm[k].class_resp += resp[i][k];
-            }
+            gmm[k].class_resp += resp[i][k];
         } 
     }
 }
@@ -47,7 +48,6 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
         // Update weights
         // gmm[k].weight = N_k / num_data_points;
         gmm[k].weight = gmm[k].class_resp / num_data_points;
-
 
         // T N_k = 0.0;
 
@@ -84,7 +84,7 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
                     double diff_j = data_points[n][j] - gmm[k].mean[j];
                     gmm[k].cov[i][j] += resp[n][k] * diff_i * diff_j;
                 }
-                gmm[k].cov[i][j] /= gmm->class_resp;
+                gmm[k].cov[i][j] /= gmm[k].class_resp;
             }
         }
 
@@ -106,10 +106,9 @@ void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, 
         m_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
 
         double log_lik = log_likelihood(data_points, dim, num_data_points, gmm, num_clusters);
-        printf("Iteration %d: Log-Likelihood = %.6f\n", iter + 1, log_lik);
 
         if(fabs(log_lik - prev_log_likelihood) < EPSILON){
-            printf("Convergence reached at iteration %d.\n", iter + 1);
+            printf("[DEBUG] Convergence reached at iteration %d.\n", iter + 1);
             break;
         }
         prev_log_likelihood = log_lik;
