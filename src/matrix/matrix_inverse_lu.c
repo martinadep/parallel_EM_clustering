@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "../include/commons.h"   
-#include "matrix.h"
+#include "matrix_utils.h"
 
 /* -------------------------------------------------------------
    LUP decomposition: A = P * L * U
@@ -47,7 +47,6 @@ int lu_decompose(T **A, int dim, int *P) {
             }
         }
     }
-
     return 0;
 }
 
@@ -69,8 +68,10 @@ void lu_solve(T **LU, int dim, int *P, T *b, T *x) {
         x[i] = y[i];
         for (int j = i + 1; j < dim; j++)
             x[i] -= LU[i][j] * x[j];
+
         x[i] /= LU[i][i];
     }
+
 
     free(y);
 }
@@ -80,13 +81,13 @@ void lu_solve(T **LU, int dim, int *P, T *b, T *x) {
 ------------------------------------------------------------- */
 int invert_matrix(T **matrix, int dim, T **matrix_inv) {
     // Copy A because LU decomposition destroys it
-    T **LU = alloc_matrix(dim);
+    T **LU = alloc_matrix(dim, dim);
     for (int i = 0; i < dim; i++)
         for (int j = 0; j < dim; j++)
             LU[i][j] = matrix[i][j];
 
     int *P = (int*)malloc(dim * sizeof(int));
-    if (lu_decompose(LU, dim, P) == -1) {
+    if (lu_decompose(LU, dim, P) == -1) { 
         return -1; // singular
     }
 
@@ -104,12 +105,11 @@ int invert_matrix(T **matrix, int dim, T **matrix_inv) {
         // Write solution into inverse matrix
         for (int i = 0; i < dim; i++)
             matrix_inv[i][col] = x[i];
-    }
+    } 
 
     free(P);
     free(e);
     free(x);
     free_matrix(LU, dim);
-
     return 0;
 }

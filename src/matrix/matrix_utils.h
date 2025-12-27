@@ -3,7 +3,7 @@
 #include "../include/commons.h"
 
 // Common utility functions implemented in matrix_utils.c
-T** alloc_matrix(int dim);
+T** alloc_matrix(int dim1, int dim2);
 void get_minor(T **A, T **minor, int dim, int p, int q);
 void free_matrix(T **matrix, int dim);
 void print_matrix(T **matrix, int dim);

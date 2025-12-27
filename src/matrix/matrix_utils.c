@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix.h"
+#include "matrix_utils.h"
 #include "../include/commons.h"
 
 /*
-   Allocate a dim x dim matrix
+   Allocate a dim1 x dim2 matrix
  */
-T** alloc_matrix(int dim) {
-    T **M = (T**)malloc(dim * sizeof(T*));
-    for (int i = 0; i < dim; i++)
-        M[i] = (T*)malloc(dim * sizeof(T));
+T** alloc_matrix(int dim1, int dim2) {
+    T **M = (T**)malloc(dim1 * sizeof(T*));
+    for (int i = 0; i < dim1; i++)
+        M[i] = (T*)malloc(dim2 * sizeof(T));
     return M;
 }
 
@@ -27,7 +27,7 @@ T determinant(T **matrix, int dim) {
     T det = 0.0f;
     int sign = 1;
 
-    T **minor = alloc_matrix(dim - 1);
+    T **minor = alloc_matrix(dim - 1, dim - 1);
 
     for (int col = 0; col < dim; col++) {
         get_minor(matrix, minor, dim, 0, col);

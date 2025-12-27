@@ -2,9 +2,19 @@
 #define __COMMONS_H_
 
 typedef double T; 
+#define MAX_ITER 100
+#define EPSILON 1e-6
 #define PI 3.14159265358979323846
 
-T single_multiv_gaussian_pdf(T* x, int dim, T* means, T** cov_matrix);
+typedef struct {
+    double *mean;      // Mean vector
+    double **cov;      // Covariance matrix
+    double **inv_cov;  // Inverse of covariance matrix
+    double weight;     // Mixture weight (pi_k)
+    double class_resp;
+} Gaussian;
 
-
+T multiv_gaussian_pdf(T* x, int dim, T* means, T** cov_matrix); //, T** inv_cov_matrix);
+void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels);
+T log_likelihood(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters);
 #endif

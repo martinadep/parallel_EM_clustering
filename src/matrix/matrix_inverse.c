@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrix.h"   
+#include "matrix_utils.h"   
 #include "../include/commons.h"
 
 /*
@@ -12,7 +12,7 @@ void cofactor(T **matrix, T **cofactor_matrix, int dim) {
         return;
     }
 
-    T **minor = alloc_matrix(dim - 1);
+    T **minor = alloc_matrix(dim - 1, dim - 1);
 
     for (int i = 0; i < dim; i++) {
         for (int j = 0; j < dim; j++) {
@@ -30,7 +30,7 @@ void cofactor(T **matrix, T **cofactor_matrix, int dim) {
    Compute adjoint matrix: adj(matrix) = transpose(cofactor(matrix))
  */
 void adjoint(T **matrix, T **adj, int dim) {
-    T **cofactor_matrix = alloc_matrix(dim);
+    T **cofactor_matrix = alloc_matrix(dim, dim);
     cofactor(matrix, cofactor_matrix, dim);
 
     // transpose(cofactor)
@@ -52,7 +52,7 @@ int invert_matrix(T **matrix, int dim, T **matrix_inv) {
     if (det == 0.0f)
         return -1;     // Singular matrix
 
-    T **adj = alloc_matrix(dim);
+    T **adj = alloc_matrix(dim, dim);
     adjoint(matrix, adj, dim);
 
     // matrix_inv = adj / det
