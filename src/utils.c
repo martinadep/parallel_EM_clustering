@@ -73,7 +73,7 @@ void write_results_csv(const char *filename, T **data, int *labels, int N, int d
 
     /* ---- Write header ---- */
     for (int d = 0; d < dim; d++) {
-        fprintf(fp, "x%d,", d);
+        fprintf(fp, "x%d,", d + 1);
     }
     fprintf(fp, "label\n");
 

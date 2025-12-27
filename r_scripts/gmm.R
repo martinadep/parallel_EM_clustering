@@ -4,14 +4,11 @@
 
 set.seed(42)   # For reproducibility
 
-# Keep plots square with balanced margins
-par(pty = "s", mar = c(4, 4, 1, 1))
-
 # number of data points
-N <- 10000
+N <- 1000
 
 # Mixture weights
-weights <- c(0.7, 0.2, 0.1)
+weights <- c(0.3, 0.4, 0.3)
 
 # Means (each row is a mean vector)
 means <- list(
@@ -61,23 +58,12 @@ data <- data.frame(
 
 # Save to CSV without labels
 write.csv(data, "./datasets/gmm_data.csv", row.names = FALSE)
-
 cat("Saved", N, "points to ./datasets/gmm_data.csv\n")
-plot(data$x1, data$x2, col = "blue",
-     main = "GMM Generated Data", xlab = "x1", ylab = "x2")
 
-#---------
+# plot(data$x1, data$x2, col = "blue",
+#      main = "GMM Generated Data", xlab = "x1", ylab = "x2")
 
 # Save to CSV with labels for reference
 data$label <- components
 write.csv(data, "./datasets/gmm_data_with_labels.csv", row.names = FALSE)
-
 cat("Saved", N, "points to ./datasets/gmm_data_with_labels.csv\n")
-plot(data$x1, data$x2, col = data$label,
-     main = "GMM Data with True Labels", xlab = "x1", ylab = "x2")
-
-# ---------
-# Plot EM clustering results
-em_predictions <- read.csv("./results/em_results.csv")
-plot(em_predictions$x0, em_predictions$x1, col = em_predictions$label,
-     main = "EM Clustering Results", xlab = "x1", ylab = "x2")
