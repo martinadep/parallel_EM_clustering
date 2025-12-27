@@ -24,7 +24,7 @@ set(COMMON_SOURCES
     )
 
 add_compile_definitions(
-    # BANDWIDTH=9.0
+    TOTAL_TIMING
     # KERNEL="epanechnikov"
     # DIM=3
 )

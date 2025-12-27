@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -7,6 +6,8 @@
 #include "include/commons.h"
 #include "include/matrix_utils.h"
 #include "include/utils.h"
+#include "include/timing/timing.h"
+
 
 int main() {
     int N, dim, K = 3;
@@ -22,9 +23,11 @@ int main() {
     init_gmm(gmm, K, dim, dataset, N);
 
     // ********** EM Algorithm Execution ************
-    
+    TOTAL_TIMER_START(EM_Algorithm)
+
     em_algorithm(dataset, dim, N, gmm, K, labels);
 
+    TOTAL_TIMER_STOP(EM_Algorithm)
     // **********************************************
     
     // Print and save results
