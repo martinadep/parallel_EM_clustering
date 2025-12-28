@@ -7,6 +7,30 @@
 #include "include/utils.h"
 #include "include/commons.h"
 
+void parsing(int argc, char *argv[], int *num_clusters, char *dataset_path, char *output_path) {
+    *num_clusters = DEFAULT_NUM_CLUSTERS;
+    strcpy(dataset_path, DEFAULT_DATASET_PATH);
+    strcpy(output_path, DEFAULT_OUTPUT_PATH);
+    
+    if (argc < 2) {
+        printf("\nNo arguments provided. Using default values.\n");
+        printf("Usage: ./em_clustering [-d <dataset_path>] [-k <num_clusters>] [-o <output_path>]\n\n");
+    }
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
+            strcpy(dataset_path, argv[++i]);
+        } else if (strcmp(argv[i], "-k") == 0 && i + 1 < argc) {
+            *num_clusters = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
+            strcpy(output_path, argv[++i]);
+        } else {
+            printf("Unknown argument: %s\n", argv[i]);
+            printf("Usage: ./%s [-d <dataset_path>] [-k <num_clusters>] [-o <output_path>]\n", argv[0]);
+            exit(1);
+        }
+    }
+}
+
 T** load_csv(const char* filename, int* num_rows, int* num_cols) {
     FILE* file = fopen(filename, "r");
     if (!file) {
@@ -84,8 +108,8 @@ void write_results_csv(const char *filename, T **data, int *labels, int N, int d
         }
         fprintf(fp, "%d\n", labels[i] + 1);
     }
-
     fclose(fp);
+    printf("\n>>> Results saved to %s\n", filename);
 }
 
 void init_gmm(Gaussian *gmm, int K, int dim, T **data, int N) {

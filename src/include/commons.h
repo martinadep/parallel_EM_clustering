@@ -5,6 +5,10 @@
 #define EPSILON 1e-6
 #define PI 3.14159265358979323846
 
+#define DEFAULT_DATASET_PATH "../datasets/gmm_data.csv"
+#define DEFAULT_OUTPUT_PATH "../results/em_results.csv"
+#define DEFAULT_NUM_CLUSTERS 3
+
 typedef double T; 
 
 typedef struct {

@@ -6,12 +6,19 @@
 #include "include/commons.h"
 #include "include/matrix_utils.h"
 #include "include/utils.h"
+
+#ifdef TOTAL_TIMING
 #include "include/timing/timing.h"
+#endif
 
 
-int main() {
-    int N, dim, K = 3;
-    T** dataset = load_csv("../datasets/gmm_data.csv", &N, &dim);
+int main(int argc, char *argv[]) {
+    int N, dim, K;
+    char dataset_path[256], output_path[256];
+
+    parsing(argc, argv, &K, dataset_path, output_path);
+
+    T** dataset = load_csv(dataset_path, &N, &dim);
     if (!dataset) {
         printf("Failed to load dataset\n");
         return 1;
@@ -32,15 +39,16 @@ int main() {
     
     // Print and save results
     printf("\nCluster Parameters:\n");
+    printf("%-7s | %-8s | %s\n", "Cluster", "Weight", "Mean");
+    printf("%s\n", "--------+----------+-----------------------------");
     for (int k = 0; k < K; k++) {
-        printf("Cluster %d (weight=%.3f):\n", k, gmm[k].weight);
-        printf("  Mean: [");
+        printf("%-7d | %-8.3f | [", k, gmm[k].weight);
         for (int d = 0; d < dim; d++) {
             printf("%.3f%s", gmm[k].mean[d], d < dim-1 ? ", " : "");
         }
         printf("]\n");
     }
-    write_results_csv("../results/em_results.csv", dataset, labels, N, dim);
+    write_results_csv(output_path, dataset, labels, N, dim);
     
     // Cleanup
     for (int k = 0; k < K; k++) {
