@@ -32,4 +32,4 @@ add_compile_definitions(
 
 add_executable(em_clustering ${COMMON_SOURCES})
 target_include_directories(em_clustering PRIVATE ${PROJECT_SOURCE_DIR}/include)
-
+target_link_libraries(em_clustering m)

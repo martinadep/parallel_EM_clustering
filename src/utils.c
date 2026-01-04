@@ -35,6 +35,7 @@ T** load_csv(const char* filename, int* num_rows, int* num_cols) {
     FILE* file = fopen(filename, "r");
     if (!file) {
         perror("fopen");
+        printf("Error opening file: %s\n", filename);
         return NULL;
     }
 

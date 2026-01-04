@@ -5,7 +5,7 @@
 set.seed(42)   # For reproducibility
 
 # number of data points
-N <- 1000
+N <- 100000
 
 # Mixture weights
 weights <- c(0.3, 0.4, 0.3)
@@ -29,6 +29,7 @@ covariances <- list(
 
 K <- length(weights)   # Number of components
 D <- length(means[[1]]) # Dimension
+base_name <- sprintf("gmm_%dp_%dk", N, K)
 
 # Sample component assignments
 components <- sample(1:K, size = N, replace = TRUE, prob = weights)
@@ -57,13 +58,15 @@ data <- data.frame(
 )
 
 # Save to CSV without labels
-write.csv(data, "./datasets/gmm_data.csv", row.names = FALSE)
-cat("Saved", N, "points to ./datasets/gmm_data.csv\n")
+unlabeled_path <- file.path("./datasets", paste0(base_name, ".csv"))
+write.csv(data, unlabeled_path, row.names = FALSE)
+cat("Saved", N, "points to", unlabeled_path, "\n")
 
 # plot(data$x1, data$x2, col = "blue",
 #      main = "GMM Generated Data", xlab = "x1", ylab = "x2")
 
 # Save to CSV with labels for reference
 data$label <- components
-write.csv(data, "./datasets/gmm_data_with_labels.csv", row.names = FALSE)
-cat("Saved", N, "points to ./datasets/gmm_data_with_labels.csv\n")
+with_labels_path <- file.path("./datasets", paste0(base_name, "_with_labels.csv"))
+write.csv(data, with_labels_path, row.names = FALSE)
+cat("Saved", N, "points to", with_labels_path, "\n")
