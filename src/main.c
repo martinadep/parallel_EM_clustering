@@ -146,8 +146,6 @@ int main(int argc, char *argv[]) {
     }
     free(gmm);
 
-    printf("Hello from rank %d of %d\n", rank, size);
-
     MPI_Finalize();
     return 0;
 }
