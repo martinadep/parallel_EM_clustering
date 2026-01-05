@@ -12,4 +12,4 @@ cd $PBS_O_WORKDIR
 
 cd build
 
-mpirun.actual -np 4 ./em_clustering -d ../datasets/gmm_100000p_3k.csv -k 3 -o ../results/out.csv
+mpirun --oversubscribe -np 4 ./em_clustering -d ../datasets/gmm_100000p_3k.csv -k 3 -o ../results/out.csv
