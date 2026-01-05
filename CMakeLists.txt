@@ -21,5 +21,5 @@ add_executable(em_clustering ${COMMON_SOURCES})
 
 # MPI links and includes
 target_include_directories(em_clustering PRIVATE ${PROJECT_SOURCE_DIR}/include ${MPI_INCLUDE_PATH})
-target_link_libraries(em_clustering ${MPI_C_LIBRARIES})
+target_link_libraries(em_clustering ${MPI_C_LIBRARIES} m)
 
