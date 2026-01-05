@@ -1,7 +1,8 @@
 #!/bin/bash
 #PBS -N em_clustering_job
-#PBS -l nodes=1:ppn=4
+#PBS -l select=1:ncpus=4:mem=2gb
 #PBS -l walltime=00:10:00
+#PBS -q short_cpuQ
 #PBS -o output_job.txt
 #PBS -e error_job.txt
 
