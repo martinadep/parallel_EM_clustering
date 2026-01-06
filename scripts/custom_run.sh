@@ -67,7 +67,7 @@ echo
 # 3) Run EM clustering
 echo "[3/4] Running EM clustering..."
 echo "Command: ${EXECUTABLE_PATH}"
-"${EXECUTABLE_PATH}" -d "${D}" -k "${K}" -o "${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv"
+"${EXECUTABLE_PATH}" -d "${DATASET_PATH}" -k "${K}" -o "${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv"
 echo "✓ EM clustering completed"
 echo
 
