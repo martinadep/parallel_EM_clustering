@@ -1,7 +1,7 @@
 #ifndef __COMMONS_H_
 #define __COMMONS_H_
 
-#define MAX_ITER 300
+#define MAX_ITER 200
 #define EPSILON 1e-6
 #define PI 3.14159265358979323846
 

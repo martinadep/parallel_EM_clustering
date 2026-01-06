@@ -42,7 +42,7 @@ if [ ! -f "${EXECUTABLE_PATH}" ]; then
     echo "[1/4] Building project (executable not found)..."
     cmake -S "${ROOT_DIR}" -B "${BUILD_DIR}"
     cmake --build "${BUILD_DIR}" --target "${EXECUTABLE}"
-    echo "✓ Build completed"
+    echo ">>> Build completed"
 else
     echo "[1/4] Executable found, skipping build"
 fi
@@ -53,7 +53,7 @@ if [ ! -f "${DATASET_PATH}" ] || [ ! -f "${LABELS_PATH}" ]; then
     echo "[2/4] Generating dataset..."
     if command -v Rscript >/dev/null 2>&1; then
         Rscript "${ROOT_DIR}/generator_and_analysis/data_generator.R" "${N}" "${K}" "${D}"
-        echo "✓ Dataset generated"
+        echo ">>> Dataset generated"
     else
         echo "ERROR: Rscript not found. Cannot generate dataset."
         echo "Please install R or generate the dataset manually."
@@ -68,25 +68,38 @@ echo
 echo "[3/4] Running EM clustering..."
 echo "Command: ${EXECUTABLE_PATH}"
 "${EXECUTABLE_PATH}" -d "${DATASET_PATH}" -k "${K}" -o "${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv"
-echo "✓ EM clustering completed"
+echo ">>> EM clustering completed"
 echo
 
-# 4) Optional plotting
-echo "[4/4] Plotting results (optional)..."
+# 4) Optional plotting/evaluation
+echo "[4/4] Analysis (optional)..."
 if command -v Rscript >/dev/null 2>&1; then
-    # Check if plot script accepts arguments, otherwise use defaults
-    if [ -f "${LABELS_PATH}" ]; then
-        Rscript "${ROOT_DIR}/generator_and_analysis/plot_em_results.R" \
-            "${LABELS_PATH}" \
-            "${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv" \
-            "${PLOTS_DIR}/em_plots_P${N}_K${K}_D${D}.pdf"
-        echo "✓ Plot saved to: ${PLOTS_DIR}/em_plots_P${N}_K${K}_D${D}.pdf"
+    if [ "${D}" -eq 2 ] && [ "${N}" -le 10000 ]; then
+        # For 2D data: create visualization plots
+        if [ -f "${LABELS_PATH}" ]; then
+            Rscript "${ROOT_DIR}/generator_and_analysis/plot_em_results.R" \
+                "${LABELS_PATH}" \
+                "${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv" \
+                "${PLOTS_DIR}/em_plots_P${N}_K${K}_D${D}.pdf"
+            echo ">>> Plot saved to: ${PLOTS_DIR}/em_plots_P${N}_K${K}_D${D}.pdf"
+        else
+            Rscript "${ROOT_DIR}/generator_and_analysis/plot_em_results.R"
+            echo ">>> Plot saved with default name"
+        fi
     else
-        Rscript "${ROOT_DIR}/generator_and_analysis/plot_em_results.R"
-        echo "✓ Plot saved with default name"
+        # For D > 2 or N > 10000: calculate performance metrics
+        PERF_OUTPUT="${RESULTS_DIR}/perf_P${N}_K${K}_D${D}.txt"
+        if [ -f "${LABELS_PATH}" ]; then
+            Rscript "${ROOT_DIR}/generator_and_analysis/perf_em_results.R" \
+                "${LABELS_PATH}" \
+                "${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv" | tee "${PERF_OUTPUT}"
+            echo ">>> Performance metrics saved to: ${PERF_OUTPUT}"
+        else
+            Rscript "${ROOT_DIR}/generator_and_analysis/perf_em_results.R" | tee "${PERF_OUTPUT}"
+        fi
     fi
 else
-    echo "Rscript not found, skipping plotting"
+    echo "Rscript not found, skipping analysis"
 fi
 echo
 
@@ -97,5 +110,9 @@ echo "Output files:"
 echo "  Dataset:  ${DATASET_PATH}"
 echo "  Labels:   ${LABELS_PATH}"
 echo "  Results:  ${RESULTS_DIR}/em_P${N}_K${K}_D${D}.csv"
-echo "  Plot:     ${PLOTS_DIR}/em_plots_P${N}_K${K}_D${D}.pdf"
+if [ "${D}" -eq 2 ] && [ "${N}" -le 10000 ]; then
+    echo "  Plot:     ${PLOTS_DIR}/em_plots_P${N}_K${K}_D${D}.pdf"
+else
+    echo "  Metrics:  ${RESULTS_DIR}/perf_P${N}_K${K}_D${D}.txt"
+fi
 echo "=========================================================="
