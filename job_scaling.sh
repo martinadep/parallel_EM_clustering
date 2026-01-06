@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -N scaling_test_64
 #PBS -l select=4:ncpus=16:mem=4gb
-#PBS -l walltime=00:30:00
+#PBS -l walltime=03:00:00
 #PBS -q short_cpuQ
 #PBS -o scaling_64_out.txt
 #PBS -e scaling_64_err.txt
@@ -19,12 +19,15 @@ echo "=========================================="
 
 run_test() {
     CORES=$1
-    echo -n "Running with $CORES cores... "
-    # Extract only the time from the execution
-    mpirun --oversubscribe -np $CORES ./em_clustering -d $DATASET -k 5 -o /dev/null | grep "execution time"
+    echo ""
+    echo "##########################################"
+    echo "### RUNNING WITH $CORES CORES"
+    echo "##########################################"
+    
+    # Run standard command showing full output
+    mpirun --oversubscribe -np $CORES ./em_clustering -d $DATASET -k 5 -o /dev/null
 }
 
-# Executes tests for different core numbers
 run_test 1
 run_test 2
 run_test 4
