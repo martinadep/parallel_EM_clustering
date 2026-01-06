@@ -2,8 +2,6 @@
 # Calculate EM clustering performance metrics
 # ===========================================
 
-library(gtools)
-
 args <- commandArgs(trailingOnly = TRUE)
 
 # Set default paths
@@ -17,12 +15,30 @@ if (length(args) >= 2) {
   em_results_path <- args[2]
 }
 
-cat("Loading data from:\n")
-cat("  True labels:", true_data_path, "\n")
-cat("  EM results:", em_results_path, "\n\n")
+# cat("Loading data from:\n")
+# cat("  True labels:", true_data_path, "\n")
+# cat("  EM results:", em_results_path, "\n\n")
 
 true_data <- read.csv(true_data_path)
 em_results <- read.csv(em_results_path)
+
+# Function to generate all permutations (no external libraries)
+generate_permutations <- function(n) {
+  if (n == 1) return(matrix(1, nrow = 1, ncol = 1))
+  
+  sub_perms <- generate_permutations(n - 1)
+  perms <- NULL
+  
+  for (i in 1:n) {
+    # Increment values >= i in sub-permutations
+    for (j in 1:nrow(sub_perms)) {
+      perm <- sub_perms[j, ]
+      perm[perm >= i] <- perm[perm >= i] + 1
+      perms <- rbind(perms, c(i, perm))
+    }
+  }
+  return(perms)
+}
 
 # Function to find the best label mapping using permutation search on a sample
 find_best_mapping <- function(true_labels, pred_labels) {
@@ -41,7 +57,7 @@ find_best_mapping <- function(true_labels, pred_labels) {
   }
   
   # Find the best mapping by trying all permutations
-  all_perms <- permutations(n_clusters, n_clusters)
+  all_perms <- generate_permutations(n_clusters)
   best_accuracy <- 0
   best_mapping <- NULL
   
@@ -60,12 +76,12 @@ find_best_mapping <- function(true_labels, pred_labels) {
 }
 
 # Calculate accuracy
-cat("Comparing EM results with ground truth labels...\n")
-cat("Number of data points:", nrow(true_data), "\n\n")
+# cat("Comparing EM results with ground truth labels...\n")
+# cat("Number of data points:", nrow(true_data), "\n\n")
 
 # Find optimal mapping using first 2000 points
 sample_size <- min(2000, nrow(true_data))
-cat("Finding optimal label mapping using first", sample_size, "points...\n")
+# cat("Finding optimal label mapping using first", sample_size, "points...\n")
 result <- find_best_mapping(true_data$label[1:sample_size], em_results$label[1:sample_size])
 
 cat("Optimal label mapping (EM -> True):\n")
@@ -90,5 +106,3 @@ for (label in sort(unique(true_data$label))) {
   class_accuracy <- confusion_matrix[as.character(label), as.character(label)] / sum(confusion_matrix[as.character(label), ]) * 100
   cat(sprintf("Class %d: %.2f%%\n", label, class_accuracy))
 }
-
-
