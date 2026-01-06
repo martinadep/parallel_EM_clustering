@@ -29,7 +29,8 @@ To try it immediately you can use the automated demo script:
     ```
 2. **Run the script**
     ```bash
-    
+    chmod +x ./scripts/quick_start.sh
+    ./scripts/quick_start.sh
     ```
 
 ## Complete Workflow - example 
@@ -52,6 +53,7 @@ To try it immediately you can use the automated demo script:
      ```bash
      cmake -B build
      cmake --build build --target em_clustering
+     cd build
      ./build/em_clustering
      ```
 3. (Optional) **Plot the results**

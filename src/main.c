@@ -23,12 +23,14 @@ int main(int argc, char *argv[]) {
         printf("Failed to load dataset\n");
         return 1;
     }
-    printf("[DEBUG] Loaded dataset: %d points, %d coordinates\n", N, dim);
-    
+    printf("[DEBUG] Loaded dataset: %d points, %d dimensions\n", N, dim);
+    printf("[DEBUG] Looking for clusters: %d\n", K);
+
     Gaussian *gmm = (Gaussian*)malloc(K * sizeof(Gaussian));
     int *labels = (int*)malloc(N * sizeof(int));
     init_gmm(gmm, K, dim, dataset, N);
 
+    printf("EM clustering...\n");
     // ********** EM Algorithm Execution ************
     TOTAL_TIMER_START(EM_Algorithm)
 
