@@ -25,7 +25,7 @@ run_test() {
     echo "##########################################"
     
     # Run standard command showing full output
-    mpirun --oversubscribe -np $CORES ./em_clustering -d $DATASET -k 5 -o /dev/null
+    mpirun --mca mca_base_component_show_load_errors 0 --oversubscribe -np $CORES ./em_clustering -d $DATASET -k 5 -o /dev/null
 }
 
 run_test 1
