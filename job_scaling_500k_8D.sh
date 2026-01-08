@@ -13,7 +13,7 @@ cd $PBS_O_WORKDIR/build
 # --- CONFIGURATION ---
 DATASET="../datasets/gmm_P500000_K5_D8.csv"
 K_CLUSTERS=5
-RESULT_CSV="results_500k_8D.csv"
+RESULT_CSV="results_500k_8D_new.csv"
 # ---------------------
 
 echo "=========================================="
