@@ -2,7 +2,7 @@
 #PBS -N scaling_3M_2D
 #PBS -l select=4:ncpus=16:mem=4gb
 #PBS -l walltime=03:00:00
-#PBS -q short_cpuQ
+#PBS -q short_HPC4DS
 #PBS -o scaling_3M_out.txt
 #PBS -e scaling_3M_err.txt
 
