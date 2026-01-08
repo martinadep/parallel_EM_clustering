@@ -3,16 +3,16 @@
 #PBS -l select=4:ncpus=16:mem=4gb
 #PBS -l walltime=03:00:00
 #PBS -q short_cpuQ
-#PBS -o scaling_64_out.txt
+#PBS -o scaling_P50K_K3_D4_out.txt
 #PBS -e scaling_64_err.txt
 
 module load gcc91 openmpi-4.0.4
 
 cd $PBS_O_WORKDIR/build
 
-DATASET="../datasets/gmm_100000p_3k.csv" 
+DATASET="../datasets/gmm_P50000_K3_D4.csv" 
 K=3
-CSV_FILE="../results/scaling_results.csv"
+CSV_FILE="../results/scaling_results_P50K_K3_D4.csv"
 
 echo "=========================================="
 echo "Starting Scaling Test (1 to 64 cores)"
