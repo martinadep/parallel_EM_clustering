@@ -12,7 +12,7 @@ cd $PBS_O_WORKDIR/build
 # --- CONFIGURATION (UPDATED) ---
 DATASET="../datasets/gmm_P200000_K5_D6.csv"
 K_CLUSTERS=5
-RESULT_CSV="results_200k_6D.csv"
+RESULT_CSV="../results_200k_6D_new.csv"
 
 echo "=== STARTING SAFE NIGHT RUN: 6 DIMENSIONS ==="
 echo "Dataset: $DATASET"
