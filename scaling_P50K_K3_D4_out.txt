@@ -1,0 +1,127 @@
+==========================================
+Starting Scaling Test (1 to 64 cores)
+Dataset: ../datasets/gmm_P50000_K3_D4.csv
+Results will be saved to: ../results/scaling_results_P50K_K3_D4.csv
+==========================================
+
+##########################################
+### RUNNING WITH 1 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 8.
+
+*** EM_Algorithm execution time: 7.679486 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+1       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+2       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+
+>>> Results saved to /dev/null
+
+##########################################
+### RUNNING WITH 2 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 7.
+
+*** EM_Algorithm execution time: 3.350473 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+1       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+2       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+
+>>> Results saved to /dev/null
+
+##########################################
+### RUNNING WITH 4 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 15.
+
+*** EM_Algorithm execution time: 3.608302 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+1       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+2       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+
+>>> Results saved to /dev/null
+
+##########################################
+### RUNNING WITH 8 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 13.
+
+*** EM_Algorithm execution time: 1.592322 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+1       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+2       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+
+>>> Results saved to /dev/null
+
+##########################################
+### RUNNING WITH 16 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 8.
+
+*** EM_Algorithm execution time: 0.518725 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+1       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+2       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+
+>>> Results saved to /dev/null
+
+##########################################
+### RUNNING WITH 32 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 9.
+
+*** EM_Algorithm execution time: 0.291760 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+1       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+2       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+
+>>> Results saved to /dev/null
+
+##########################################
+### RUNNING WITH 64 CORES
+##########################################
+[MPI Master] Loaded dataset: 50000 points, 4 coordinates
+[DEBUG] Convergence reached at iteration 15.
+
+*** EM_Algorithm execution time: 0.259504 s ***
+
+Cluster Parameters:
+Cluster | Weight   | Mean
+--------+----------+-----------------------------
+0       | 0.331    | [7.024, 6.782, -6.262, -13.288]
+1       | 0.118    | [-10.751, 10.255, 13.878, 12.008]
+2       | 0.551    | [0.666, 9.518, 5.061, 5.663]
+
+>>> Results saved to /dev/null
+==========================================
+Test Completed. Check ../results/scaling_results_P50K_K3_D4.csv
+==========================================
