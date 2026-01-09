@@ -41,7 +41,13 @@ run_test() {
     
     TMP_LOG="run_${CORES}_Ptest_300k.log"
     
-    mpirun --mca mca_base_component_show_load_errors 0 --oversubscribe -np $CORES "$EXEC_PATH" -d "$DATASET" -k $K_CLUSTERS -o /dev/null 2>&1 | tee "$TMP_LOG"
+    # Run MPI with flags to disable OpenIB (Infiniband) and force TCP/Shared Memory
+    # This prevents warnings and segmentation faults caused by buggy IB drivers
+    mpirun --oversubscribe \
+           --mca mca_base_component_show_load_errors 0 \
+           --mca btl ^openib \
+           --mca btl_base_warn_component_unused 0 \
+           -np $CORES "$EXEC_PATH" -d "$DATASET" -k $K_CLUSTERS -o /dev/null 2>&1 | tee "$TMP_LOG"
     
     TIME=$(grep "EM_Algorithm execution time" "$TMP_LOG" | awk '{print $5}')
     N_PTS=$(grep "Loaded dataset" "$TMP_LOG" | awk '{print $5}')
