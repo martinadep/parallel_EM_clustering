@@ -2,7 +2,7 @@
 #PBS -N scaling_N250k
 #PBS -l select=4:ncpus=16:mem=4gb
 #PBS -l walltime=06:00:00
-#PBS -q short_cpuQ
+#PBS -q short_HPC4DS
 #PBS -o scaling_N250k_out.txt
 #PBS -e scaling_N250k_err.txt
 
