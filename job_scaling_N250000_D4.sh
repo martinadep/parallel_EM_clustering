@@ -2,7 +2,7 @@
 #PBS -N scaling_N250k
 #PBS -l select=4:ncpus=16:mem=4gb
 #PBS -l walltime=06:00:00
-#PBS -q short_HPC4DS
+#PBS -q short_cpuQ
 #PBS -o scaling_N250k_out.txt
 #PBS -e scaling_N250k_err.txt
 
@@ -23,7 +23,6 @@ mkdir -p "$PROJECT_ROOT/results"
 
 echo "=========================================="
 echo "STARTING SCALING TEST: N=250000, D=4"
-echo "Job Max Time: 6 Hours"
 echo "Dataset: $DATASET"
 echo "Saving to: $RESULT_CSV"
 echo "=========================================="
@@ -39,24 +38,20 @@ run_test() {
     echo ">>> Running with $CORES CORES"
     echo "##########################################"
     
-    OUTPUT=$(mpirun --mca mca_base_component_show_load_errors 0 --oversubscribe -np $CORES "$EXEC_PATH" -d "$DATASET" -k $K_CLUSTERS -o /dev/null)
+    TMP_LOG="run_${CORES}_N250k.log"
     
-    echo "$OUTPUT"
-
-    TIME=$(echo "$OUTPUT" | grep "EM_Algorithm execution time" | awk '{print $5}')
-    N_PTS=$(echo "$OUTPUT" | grep "Loaded dataset" | awk '{print $5}')
-    D_DIM=$(echo "$OUTPUT" | grep "Loaded dataset" | awk '{print $7}')
+    mpirun --mca mca_base_component_show_load_errors 0 --oversubscribe -np $CORES "$EXEC_PATH" -d "$DATASET" -k $K_CLUSTERS -o /dev/null 2>&1 | tee "$TMP_LOG"
+    
+    TIME=$(grep "EM_Algorithm execution time" "$TMP_LOG" | awk '{print $5}')
+    N_PTS=$(grep "Loaded dataset" "$TMP_LOG" | awk '{print $5}')
+    D_DIM=$(grep "Loaded dataset" "$TMP_LOG" | awk '{print $7}')
     
     if [ -z "$TIME" ]; then TIME="ERR"; fi
     if [ -z "$N_PTS" ]; then N_PTS="Missing"; fi
 
     echo "$CORES,$N_PTS,$K_CLUSTERS,$D_DIM,$TIME" >> "$RESULT_CSV"
+    rm "$TMP_LOG"
 }
 
-for c in 1 2 4 8 16 32 64; do
-    run_test $c
-done
-
-echo "=========================================="
-echo "Job N250000_D4 Completed."
-echo "=========================================="
+for c in 1 2 4 8 16 32 64; do run_test $c; done
+echo "=== COMPLETED ==="
