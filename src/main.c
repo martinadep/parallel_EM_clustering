@@ -97,22 +97,7 @@ int main(int argc, char *argv[]) {
         free(flat_cov);
     }
 
-    // *** FIX: Allocate and Compute Initial Inverse Covariance on Workers ***
-    if (rank != 0) {
-        for(int k=0; k<K; k++) {
-            gmm[k].inv_cov = alloc_matrix(dim, dim); // Ensure allocation
-            // Compute inverse immediately so E-step doesn't crash
-            // CORRECT FUNCTION NAME: invert_matrix
-            invert_matrix(gmm[k].cov, dim, gmm[k].inv_cov); 
-        }
-    } else {
-        // Ensure master also has inv_cov ready if it wasn't done in init_gmm
-        for(int k=0; k<K; k++) {
-             if (gmm[k].inv_cov == NULL) gmm[k].inv_cov = alloc_matrix(dim, dim);
-             invert_matrix(gmm[k].cov, dim, gmm[k].inv_cov);
-        }
-    }
-    // **********************************************************************
+    
 
     // ********** EM Algorithm Execution ************
     TOTAL_TIMER_START(EM_Algorithm)
