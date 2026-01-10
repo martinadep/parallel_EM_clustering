@@ -97,7 +97,6 @@ int main(int argc, char *argv[]) {
         free(flat_cov);
     }
 
-    
 
     // ********** EM Algorithm Execution ************
     TOTAL_TIMER_START(EM_Algorithm)
