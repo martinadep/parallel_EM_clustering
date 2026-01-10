@@ -102,13 +102,14 @@ int main(int argc, char *argv[]) {
         for(int k=0; k<K; k++) {
             gmm[k].inv_cov = alloc_matrix(dim, dim); // Ensure allocation
             // Compute inverse immediately so E-step doesn't crash
-            inverse_matrix(gmm[k].cov, gmm[k].inv_cov, dim); 
+            // CORRECT FUNCTION NAME: invert_matrix
+            invert_matrix(gmm[k].cov, dim, gmm[k].inv_cov); 
         }
     } else {
         // Ensure master also has inv_cov ready if it wasn't done in init_gmm
         for(int k=0; k<K; k++) {
              if (gmm[k].inv_cov == NULL) gmm[k].inv_cov = alloc_matrix(dim, dim);
-             inverse_matrix(gmm[k].cov, gmm[k].inv_cov, dim);
+             invert_matrix(gmm[k].cov, dim, gmm[k].inv_cov);
         }
     }
     // **********************************************************************
