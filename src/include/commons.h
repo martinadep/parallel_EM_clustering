@@ -15,11 +15,12 @@ typedef struct {
     double *mean;      // Mean vector
     double **cov;      // Covariance matrix
     double **inv_cov;  // Inverse of covariance matrix
+    double det;        // Determinant of covariance matrix
     double weight;     // Mixture weight (pi_k)
     double class_resp; // Class responsibility
 } Gaussian;
 
-T multiv_gaussian_pdf(T* x, int dim, T* means, T** cov_matrix); //, T** inv_cov_matrix);
+T multiv_gaussian_pdf(T* x, int dim, const Gaussian* g);
 void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels);
 T log_likelihood(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters);
 

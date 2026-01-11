@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
     for (int k = 0; k < K; k++) {
         free(gmm[k].mean);
         free_matrix(gmm[k].cov, dim);
+        free_matrix(gmm[k].inv_cov, dim);
     }
     free(gmm);
     free(labels);
