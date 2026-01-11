@@ -67,9 +67,8 @@ echo
 
 for THREADS in 1 2 4 8 16 32 64 96
 do
-    echo "[3/4] Running EM clustering with ${THREADS} threads..."
-    echo "Command: OMP_NUM_THREADS=${THREADS} ${EXECUTABLE_PATH}"
-    OMP_NUM_THREADS=${THREADS} "${EXECUTABLE_PATH}" -d "${DATASET_PATH}" -k "${K}" -o "${RESULTS_DIR}/em_P${N}_K${K}_D${D}_threads${THREADS}.csv" >> "${RESULTS_DIR}/strong_scaling_omp_results.csv"
+    echo "Running EM clustering with ${THREADS} threads..."
+    OMP_NUM_THREADS=${THREADS} "${EXECUTABLE_PATH}" -d "${DATASET_PATH}" -k "${K}" -o "${RESULTS_DIR}/em_P${N}_K${K}_D${D}_threads${THREADS}.csv" >> "${RESULTS_DIR}/strong_scaling_omp_results.txt"
     echo
 done
 
