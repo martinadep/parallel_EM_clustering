@@ -70,7 +70,7 @@
     gettimeofday(&end_##label, NULL); \
     duration_##label = (end_##label.tv_sec - start_##label.tv_sec) + \
                        (end_##label.tv_usec - start_##label.tv_usec) / 1e6; \
-    printf("\n*** " #label " execution time: %f s ***\n", duration_##label);
+    // printf("\n*** " #label " execution time: %f s ***\n", duration_##label);
 
 #define GET_DURATION(label) \
     printf("%f", duration_##label);
