@@ -110,7 +110,7 @@ void write_results_csv(const char *filename, T **data, int *labels, int N, int d
         fprintf(fp, "%d\n", labels[i] + 1);
     }
     fclose(fp);
-    printf("\n>>> Results saved to %s\n", filename);
+    // printf("\n>>> Results saved to %s\n", filename);
 }
 
 void init_gmm(Gaussian *gmm, int K, int dim, T **data, int N) {

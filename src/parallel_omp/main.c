@@ -51,7 +51,9 @@ int main(int argc, char *argv[]) {
     {
         #pragma omp master
         {
-            printf("%d, %d, %d, %d, %d\n", N, K, dim, omp_get_num_threads());
+            printf("%d, %d, %d, %d,", N, K, dim, omp_get_num_threads());
+            GET_DURATION(EM_Algorithm)
+            Printf("\n");
         }
     }
     

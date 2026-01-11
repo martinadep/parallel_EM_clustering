@@ -72,5 +72,8 @@
                        (end_##label.tv_usec - start_##label.tv_usec) / 1e6; \
     printf("\n*** " #label " execution time: %f s ***\n", duration_##label);
 
+#define GET_DURATION(label) \
+    printf("%f", duration_##label);
+
 #endif
 #endif // __TIMING_H__
