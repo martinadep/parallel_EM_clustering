@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
         {
             printf("%d, %d, %d, %d,", N, K, dim, omp_get_num_threads());
             GET_DURATION(EM_Algorithm)
-            Printf("\n");
+            printf("\n");
         }
     }
     
