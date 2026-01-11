@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
+#include <omp.h>
 #include "include/commons.h"
 #include "include/matrix_utils.h"
 #include "include/utils.h"
@@ -31,6 +32,13 @@ int main(int argc, char *argv[]) {
     init_gmm(gmm, K, dim, dataset, N);
 
     printf("EM clustering...\n");
+    #pragma omp parallel
+    {
+        #pragma omp master
+        {
+            printf("Running with %d threads\n", omp_get_num_threads());
+        }
+    }
     // ********** EM Algorithm Execution ************
     TOTAL_TIMER_START(EM_Algorithm)
 
@@ -53,6 +61,7 @@ int main(int argc, char *argv[]) {
     write_results_csv(output_path, dataset, labels, N, dim);
     
     // Cleanup
+    #pragma omp parallel for
     for (int k = 0; k < K; k++) {
         free(gmm[k].mean);
         free_matrix(gmm[k].cov, dim);
