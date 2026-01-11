@@ -1,46 +1,33 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h> 
+#include <omp.h>
 
 #include "../include/matrix_utils.h"
 #include "../include/commons.h"
 
-// E-Step: Computes responsibilities for all data points
+// -------------------- E-Step --------------------
 void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
     // Reset class responsibilities
     for(int k = 0; k < num_clusters; k++){
         gmm[k].class_resp = 0.0;
     }
 
+    // Compute responsibilities in parallel over data points
     #pragma omp parallel for
-    for(int i = 0; i < num_data_points; i++){
+    for(int n = 0; n < num_data_points; n++){
         T norm = 0.0;
         for(int k = 0; k < num_clusters; k++){
-            T pdf = multiv_gaussian_pdf(data_points[i], dim, gmm[k].mean, gmm[k].cov); 
-            resp[i][k] = gmm[k].weight * pdf;
-            norm += resp[i][k];
+            T pdf = multiv_gaussian_pdf(data_points[n], dim, gmm[k].mean, gmm[k].cov);
+            resp[n][k] = gmm[k].weight * pdf;
+            norm += resp[n][k];
         }
-
-        // Normalize responsibilities
         for(int k = 0; k < num_clusters; k++){
-            resp[i][k] /= norm;
+            resp[n][k] /= norm;
         }
     }
 
-    // Accumulate class responsibilities
-    for(int k = 0; k < num_clusters; k++){
-        T sum = 0.0;
-        #pragma omp parallel for reduction(+:sum)
-        for(int i = 0; i < num_data_points; i++){
-            sum += resp[i][k];
-        }
-        gmm[k].class_resp = sum;
-    }
-}
-void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
-    // Step 1: Update class responsibilities (sum of resp for each cluster)
-    #pragma omp parallel for
+    // Accumulate class responsibilities (sequential over K, parallel over N)
     for(int k = 0; k < num_clusters; k++){
         T sum = 0.0;
         #pragma omp parallel for reduction(+:sum)
@@ -48,22 +35,25 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
             sum += resp[n][k];
         }
         gmm[k].class_resp = sum;
-        gmm[k].weight = sum / num_data_points;
     }
+}
 
-    // Step 2: Compute weighted means
-    #pragma omp parallel for
+// -------------------- M-Step --------------------
+void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
+    // Update weights and means
     for(int k = 0; k < num_clusters; k++){
-        T* mean = gmm[k].mean;
         T resp_sum = gmm[k].class_resp;
+        gmm[k].weight = resp_sum / num_data_points;
 
         // Initialize mean
+        T* mean = gmm[k].mean;
         for(int d = 0; d < dim; d++) mean[d] = 0.0;
 
-        // Weighted sum
-        #pragma omp parallel for reduction(+:mean[:dim])
+        // Weighted sum of data points
+        #pragma omp parallel for
         for(int n = 0; n < num_data_points; n++){
             for(int d = 0; d < dim; d++){
+                #pragma omp atomic
                 mean[d] += resp[n][k] * data_points[n][d];
             }
         }
@@ -74,8 +64,7 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
         }
     }
 
-    // Step 3: Compute weighted covariance matrices
-    #pragma omp parallel for
+    // Update covariance matrices
     for(int k = 0; k < num_clusters; k++){
         T** cov = gmm[k].cov;
         T* mean = gmm[k].mean;
@@ -86,33 +75,17 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
             for(int j = 0; j < dim; j++)
                 cov[i][j] = 0.0;
 
-        // Compute weighted outer products
-        #pragma omp parallel
-        {
-            // Thread-local private covariance accumulator
-            T local_cov[dim][dim];
-            for(int i = 0; i < dim; i++)
-                for(int j = 0; j < dim; j++)
-                    local_cov[i][j] = 0.0;
-
-            #pragma omp for nowait
-            for(int n = 0; n < num_data_points; n++){
-                T r = resp[n][k];
-                for(int i = 0; i < dim; i++){
-                    T diff_i = data_points[n][i] - mean[i];
-                    for(int j = 0; j < dim; j++){
-                        T diff_j = data_points[n][j] - mean[j];
-                        local_cov[i][j] += r * diff_i * diff_j;
-                    }
+        // Accumulate weighted outer products
+        #pragma omp parallel for
+        for(int n = 0; n < num_data_points; n++){
+            T r = resp[n][k];
+            for(int i = 0; i < dim; i++){
+                T diff_i = data_points[n][i] - mean[i];
+                for(int j = 0; j < dim; j++){
+                    T diff_j = data_points[n][j] - mean[j];
+                    #pragma omp atomic
+                    cov[i][j] += r * diff_i * diff_j;
                 }
-            }
-
-            // Combine thread-local covariances into global cov
-            #pragma omp critical
-            {
-                for(int i = 0; i < dim; i++)
-                    for(int j = 0; j < dim; j++)
-                        cov[i][j] += local_cov[i][j];
             }
         }
 
@@ -126,7 +99,7 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
     }
 }
 
-// EM Algorithm
+// -------------------- EM Algorithm --------------------
 void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels) {
     T** resp = alloc_matrix(num_data_points, num_clusters);
     T prev_log_likelihood = -INFINITY;
@@ -135,8 +108,18 @@ void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, 
         e_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
         m_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
 
-        double log_lik = log_likelihood(data_points, dim, num_data_points, gmm, num_clusters);
+        // Compute log-likelihood in parallel
+        double log_lik = 0.0;
+        #pragma omp parallel for reduction(+:log_lik)
+        for(int n = 0; n < num_data_points; n++){
+            T p = 0.0;
+            for(int k = 0; k < num_clusters; k++){
+                p += gmm[k].weight * multiv_gaussian_pdf(data_points[n], dim, gmm[k].mean, gmm[k].cov);
+            }
+            log_lik += log(p);
+        }
 
+        // Check convergence
         if(fabs(log_lik - prev_log_likelihood) < EPSILON){
             printf("[DEBUG] Convergence reached at iteration %d.\n", iter + 1);
             break;
@@ -144,7 +127,7 @@ void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, 
         prev_log_likelihood = log_lik;
     }
 
-    // Assign final labels
+    // Assign labels (parallel over N)
     #pragma omp parallel for
     for(int n = 0; n < num_data_points; n++){
         int max_k = 0;
