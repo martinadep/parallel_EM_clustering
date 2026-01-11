@@ -24,21 +24,21 @@ int main(int argc, char *argv[]) {
         printf("Failed to load dataset\n");
         return 1;
     }
-    printf("[DEBUG] Loaded dataset: %d points, %d dimensions\n", N, dim);
-    printf("[DEBUG] Looking for clusters: %d\n", K);
+    // printf("[DEBUG] Loaded dataset: %d points, %d dimensions\n", N, dim);
+    // printf("[DEBUG] Looking for clusters: %d\n", K);
 
     Gaussian *gmm = (Gaussian*)malloc(K * sizeof(Gaussian));
     int *labels = (int*)malloc(N * sizeof(int));
     init_gmm(gmm, K, dim, dataset, N);
 
-    printf("EM clustering...\n");
-    #pragma omp parallel
-    {
-        #pragma omp master
-        {
-            printf("Running with %d threads\n", omp_get_num_threads());
-        }
-    }
+    // printf("EM clustering...\n");
+    // #pragma omp parallel
+    // {
+    //     #pragma omp master
+    //     {
+    //         // printf("Running with %d threads\n", omp_get_num_threads());
+    //     }
+    // }
     // ********** EM Algorithm Execution ************
     TOTAL_TIMER_START(EM_Algorithm)
 
@@ -46,18 +46,26 @@ int main(int argc, char *argv[]) {
 
     TOTAL_TIMER_STOP(EM_Algorithm)
     // **********************************************
+
+    #pragma omp parallel
+    {
+        #pragma omp master
+        {
+            printf("%d, %d, %d, %d, %d\n", N, K, dim, omp_get_num_threads());
+        }
+    }
     
     // Print and save results
-    printf("\nCluster Parameters:\n");
-    printf("%-7s | %-8s | %s\n", "Cluster", "Weight", "Mean");
-    printf("%s\n", "--------+----------+-----------------------------");
-    for (int k = 0; k < K; k++) {
-        printf("%-7d | %-8.3f | [", k, gmm[k].weight);
-        for (int d = 0; d < dim; d++) {
-            printf("%.3f%s", gmm[k].mean[d], d < dim-1 ? ", " : "");
-        }
-        printf("]\n");
-    }
+    // printf("\nCluster Parameters:\n");
+    // printf("%-7s | %-8s | %s\n", "Cluster", "Weight", "Mean");
+    // printf("%s\n", "--------+----------+-----------------------------");
+    // for (int k = 0; k < K; k++) {
+    //     // printf("%-7d | %-8.3f | [", k, gmm[k].weight);
+    //     for (int d = 0; d < dim; d++) {
+    //         printf("%.3f%s", gmm[k].mean[d], d < dim-1 ? ", " : "");
+    //     }
+    //     printf("]\n");
+    // }
     write_results_csv(output_path, dataset, labels, N, dim);
     
     // Cleanup

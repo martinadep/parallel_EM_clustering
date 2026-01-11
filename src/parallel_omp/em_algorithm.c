@@ -97,7 +97,7 @@ void em_algorithm(T** data_points, int dim, int num_data_points,
                                         num_data_points, gmm, num_clusters);
 
         if(fabs(log_lik - prev_log_likelihood) < EPSILON){
-            printf("[DEBUG] Convergence reached at iteration %d.\n", iter + 1);
+            // printf("[DEBUG] Convergence reached at iteration %d.\n", iter + 1);
             break;
         }
 
