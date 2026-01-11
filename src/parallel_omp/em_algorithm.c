@@ -11,7 +11,7 @@ void e_step(T** data_points, int dim, int num_data_points,
             Gaussian* gmm, int num_clusters, T** resp)
 {
     /* responsabilità */
-    #pragma omp for schedule(static)
+    #pragma omp parallel for schedule(static)
     for(int i = 0; i < num_data_points; i++){
         T norm = 0.0;
 
@@ -27,7 +27,7 @@ void e_step(T** data_points, int dim, int num_data_points,
     }
 
     /* riduzione class_resp */
-    #pragma omp for schedule(static)
+    #pragma omp parallel for schedule(static)
     for(int k = 0; k < num_clusters; k++){
         T sum = 0.0;
         for(int i = 0; i < num_data_points; i++)
@@ -41,12 +41,12 @@ void m_step(T** data_points, int dim, int num_data_points,
             Gaussian* gmm, int num_clusters, T** resp)
 {
     /* pesi */
-    #pragma omp for schedule(static)
+    #pragma omp parallel for schedule(static)
     for(int k = 0; k < num_clusters; k++)
         gmm[k].weight = gmm[k].class_resp / num_data_points;
 
     /* mean */
-    #pragma omp for collapse(2) schedule(static)
+    #pragma omp parallel for collapse(2) schedule(static)
     for(int k = 0; k < num_clusters; k++)
     for(int d = 0; d < dim; d++){
         T sum = 0.0;
@@ -56,7 +56,7 @@ void m_step(T** data_points, int dim, int num_data_points,
     }
 
     /* cov */
-    #pragma omp for collapse(3) schedule(static)
+    #pragma omp parallel for collapse(3) schedule(static)
     for(int k = 0; k < num_clusters; k++)
     for(int i = 0; i < dim; i++)
     for(int j = 0; j < dim; j++){
