@@ -38,14 +38,14 @@ target_link_libraries(em_clustering m)
 # Parallel OpenMP version
 set(PARALLEL_SOURCES
     src/parallel_omp/main.c
+    src/parallel_omp/em_algorithm.c
     src/utils.c
     src/matrix/matrix_inverse_lu.c
     src/matrix/matrix_utils.c
     src/multiv_gaussian.c
-    src/parallel_omp/em_algorithm.c
     src/log_likelihood.c
 )
 
 add_executable(em_clustering_omp ${PARALLEL_SOURCES})
-target_include_directories(em_clustering_omp PRIVATE ${PROJECT_SOURCE_DIR})
+target_include_directories(em_clustering_omp PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(em_clustering_omp m OpenMP::OpenMP_C)
