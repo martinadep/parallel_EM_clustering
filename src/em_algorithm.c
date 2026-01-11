@@ -15,7 +15,7 @@ void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
         T norm = 0.0;
         // unnormalized responsibility
         for(int k = 0; k < num_clusters; k++){
-            T pdf = multiv_gaussian_pdf(data_points[i], dim, &gmm[k]);
+            T pdf = multiv_gaussian_pdf(data_points[i], dim, gmm[k].mean, gmm[k].cov);
             resp[i][k] = gmm[k].weight * pdf;
             norm += resp[i][k];
         }
@@ -64,15 +64,6 @@ void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int nu
         // Add regularization to avoid singular covariance
         for (int i = 0; i < dim; i++)
             gmm[k].cov[i][i] += 1e-6;
-
-        if (!gmm[k].inv_cov)
-            gmm[k].inv_cov = alloc_matrix(dim, dim);
-        if (invert_matrix(gmm[k].cov, dim, gmm[k].inv_cov) != 0) {
-            printf("Covariance matrix is singular for cluster %d, cannot invert.\n", k);
-            gmm[k].det = 0.0;
-        } else {
-            gmm[k].det = determinant(gmm[k].cov, dim);
-        }
     }
 }
 

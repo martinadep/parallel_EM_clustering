@@ -174,19 +174,11 @@ void init_gmm(Gaussian *gmm, int K, int dim, T **data, int N) {
     for (int k = 0; k < K; k++) {
         gmm[k].weight = 1.0 / K;
         gmm[k].cov = alloc_matrix(dim, dim);
-        gmm[k].inv_cov = alloc_matrix(dim, dim);
         gmm[k].class_resp = 0.0;
         for (int i = 0; i < dim; i++) {
             for (int j = 0; j < dim; j++) {
                 gmm[k].cov[i][j] = global_cov[i][j];
             }
-        }
-
-        if (invert_matrix(gmm[k].cov, dim, gmm[k].inv_cov) != 0) {
-            printf("Covariance matrix is singular during init for cluster %d.\n", k);
-            gmm[k].det = 0.0;
-        } else {
-            gmm[k].det = determinant(gmm[k].cov, dim);
         }
     }
     
