@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     //     }
     //     printf("]\n");
     // }
-    write_results_csv(output_path, dataset, labels, N, dim);
+    // write_results_csv(output_path, dataset, labels, N, dim);
     
     // Cleanup
     #pragma omp parallel for
