@@ -6,9 +6,9 @@ library(readr)
 # CONFIGURAZIONE FILE
 # ==============================================================================
 # Percorsi relativi alla root del progetto
-file_200k <- "results/scaling_Ptest_200k_1.csv"
-file_300k <- "results/scaling_Ptest_300k_1.csv"
-file_500k <- "results/scaling_Ptest_500k_1.csv"
+file_d6 <- "results/scaling_Ptest_D6_1.csv"
+file_d7 <- "results/scaling_Ptest_D7_1.csv"
+file_d8 <- "results/scaling_Ptest_D8_1.csv"
 
 # ==============================================================================
 # CARICAMENTO DATI
@@ -16,7 +16,7 @@ file_500k <- "results/scaling_Ptest_500k_1.csv"
 
 read_and_label <- function(filepath, label) {
   if(!file.exists(filepath)) {
-    # Fallback per compatibilità se lanciato dalla cartella r_scripts invece che dalla root
+    # Fallback per compatibilità
     filepath_alt <- paste0("../", filepath)
     if(file.exists(filepath_alt)) {
       filepath <- filepath_alt
@@ -26,24 +26,24 @@ read_and_label <- function(filepath, label) {
   }
   
   df <- read_csv(filepath, show_col_types = FALSE)
-  df$Dataset <- label
+  df$Dimensions <- label
   df$Cores <- as.numeric(df$Cores)
   return(df)
 }
 
 cat("Caricamento dataset...\n")
 
-df_200 <- read_and_label(file_200k, "N=200k")
-df_300 <- read_and_label(file_300k, "N=300k")
-df_500 <- read_and_label(file_500k, "N=500k")
+df_d6 <- read_and_label(file_d6, "D=6")
+df_d7 <- read_and_label(file_d7, "D=7")
+df_d8 <- read_and_label(file_d8, "D=8")
 
 # Unione
-df_all <- bind_rows(df_200, df_300, df_500)
-df_all$Dataset <- factor(df_all$Dataset, levels = c("N=200k", "N=300k", "N=500k"))
+df_all <- bind_rows(df_d6, df_d7, df_d8)
+df_all$Dimensions <- factor(df_all$Dimensions, levels = c("D=6", "D=7", "D=8"))
 
-# Calcolo Metriche per ogni dataset
+# Calcolo Metriche
 df_metrics <- df_all %>%
-  group_by(Dataset) %>%
+  group_by(Dimensions) %>%
   arrange(Cores) %>%
   mutate(
     T1 = Time_Sec[Cores == 1],      # Tempo sequenziale
@@ -52,14 +52,14 @@ df_metrics <- df_all %>%
   ) %>%
   ungroup()
 
-# Calcolo massima efficienza per adattare il grafico
+# Calcolo massima efficienza per adattare il grafico (utile per super-linear scaling in D=8)
 max_eff <- max(df_metrics$Efficiency, na.rm = TRUE)
 
 # ==============================================================================
 # GRAFICI (STILE UNIFORME)
 # ==============================================================================
 
-# Tema personalizzato (lo stesso usato per K)
+# Tema personalizzato
 custom_theme <- theme_minimal() +
   theme(
     plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
@@ -69,61 +69,64 @@ custom_theme <- theme_minimal() +
     panel.grid.minor = element_blank()
   )
 
-# Palette colori per N (Blu scuro, Blu medio, Rosso scuro o simili per distinguere)
-colors_n <- c("N=200k" = "#D55E00", "N=300k" = "#0072B2", "N=500k" = "#CC79A7")
+# Palette colori alta visibilità
+colors_d <- c("D=6" = "#1b9e77", "D=7" = "#d95f02", "D=8" = "#7570b3")  
 breaks_cores <- sort(unique(df_metrics$Cores))
 
 # --- 1. SPEEDUP ---
-p_speedup <- ggplot(df_metrics, aes(x = Cores, y = Speedup, color = Dataset, group = Dataset)) +
+p_speedup <- ggplot(df_metrics, aes(x = Cores, y = Speedup, color = Dimensions, group = Dimensions)) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray60") +
   annotate("text", x = 8, y = 10, label = "Ideal Scaling", color = "gray60", angle = 45, vjust = -0.5) +
   geom_line(linewidth = 1) +
   geom_point(size = 3) +
   scale_x_continuous(trans = "log2", breaks = breaks_cores) +
   scale_y_continuous(trans = "log2", breaks = breaks_cores) +
-  scale_color_manual(values = colors_n) +
+  scale_color_manual(values = colors_d) +
   labs(x = "Number of Cores (log scale)",
     y = "Speedup",
-    color = "Dataset"
+    color = "Dimensions"
   ) +
   custom_theme
 
 # --- 2. EFFICIENCY ---
-p_efficiency <- ggplot(df_metrics, aes(x = Cores, y = Efficiency, color = Dataset, group = Dataset)) +
+p_efficiency <- ggplot(df_metrics, aes(x = Cores, y = Efficiency, color = Dimensions, group = Dimensions)) +
   geom_hline(yintercept = 1, linetype = "dashed", color = "gray60") +
   geom_line(linewidth = 1) +
   geom_point(size = 3) +
   scale_x_continuous(trans = "log2", breaks = breaks_cores) +
-  # Limite Y dinamico per accomodare efficienze > 1
+  # Limite Y dinamico
   scale_y_continuous(limits = c(0, max(1.2, max_eff * 1.05)), labels = scales::percent) +
-  scale_color_manual(values = colors_n) +
+  scale_color_manual(values = colors_d) +
   labs(x = "Number of Cores (log scale)",
     y = "Efficiency",
-    color = "Dataset"
+    color = "Dimensions"
   ) +
   custom_theme
 
 # --- 3. TIME ---
-p_time <- ggplot(df_metrics, aes(x = Cores, y = Time_Sec, color = Dataset, group = Dataset)) +
+p_time <- ggplot(df_metrics, aes(x = Cores, y = Time_Sec, color = Dimensions, group = Dimensions)) +
   geom_line(linewidth = 1) +
   geom_point(size = 3) +
   scale_x_continuous(trans = "log2", breaks = breaks_cores) +
-  scale_y_continuous(trans = "log10") + # Logaritmico per i tempi
-  scale_color_manual(values = colors_n) +
+  scale_y_continuous(trans = "log10") + # Logaritmico essenziale qui (differenze enormi)
+  scale_color_manual(values = colors_d) +
   labs(x = "Number of Cores (log scale)",
     y = "Time in seconds (log scale)",
-    color = "Dataset"
+    color = "Dimensions"
   ) +
   custom_theme
-
 
 # ==============================================================================
 # SALVATAGGIO
 # ==============================================================================
-dir.create("results/plots", showWarnings = FALSE)
 
-ggsave("results/plots/scaling_N_speedup.png", plot = p_speedup, width = 8, height = 6, dpi = 300)
-ggsave("results/plots/scaling_N_efficiency.png", plot = p_efficiency, width = 8, height = 6, dpi = 300)
-ggsave("results/plots/scaling_N_time.png", plot = p_time, width = 8, height = 6, dpi = 300)
+output_dir <- "results/plots"
+if(!dir.exists("results") && dir.exists("../results")) output_dir <- "../results/plots"
+dir.create(output_dir, showWarnings = FALSE)
 
-cat("Grafici salvati in results/plots/\n")
+cat(paste("Salvataggio grafici in", output_dir, "...\n"))
+
+ggsave(file.path(output_dir, "scaling_D_speedup.png"), plot = p_speedup, width = 8, height = 6, dpi = 300)
+ggsave(file.path(output_dir, "scaling_D_efficiency.png"), plot = p_efficiency, width = 8, height = 6, dpi = 300)
+ggsave(file.path(output_dir, "scaling_D_time.png"), plot = p_time, width = 8, height = 6, dpi = 300)
+cat("Grafici salvati in", output_dir, "\n")
