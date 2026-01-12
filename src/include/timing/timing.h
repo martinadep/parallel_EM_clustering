@@ -1,12 +1,12 @@
 #ifndef __TIMING_H__
 #define __TIMING_H__
+
 #include <stdio.h>
-#include <sys/time.h>
-#include <omp.h> // Use OpenMP for timing
-// #include <mpi.h> // Use MPI_Wtime for total timing
-// TODO: switch to MPI_Wtime for all timing
+#include <mpi.h> // Usa MPI per il timing
+
 
 #ifdef TIMING_BREAKDOWN
+#include <omp.h> // Use OpenMP for timing
 // Timer definition
 #define TIMER_DEF(label) \
     static double start_##label, end_##label; \
@@ -51,29 +51,19 @@
 
 #ifdef TOTAL_TIMING
 
-// #define TOTAL_TIMER_START(label) \
-//     double start_##label, end_##label; \
-//     double duration_##label = 0.0; \
-//     start_##label = gettimeofday();
-
-// #define TOTAL_TIMER_STOP(label) \
-//     end_##label = gettimeofday(); \
-//     duration_##label = end_##label - start_##label; \
-//     printf(#label " execution time: %f s\n", duration_##label);
+// Macro definitions using MPI_Wtime
 
 #define TOTAL_TIMER_START(label) \
-    struct timeval start_##label, end_##label; \
+    double start_##label, end_##label; \
     double duration_##label = 0.0; \
-    gettimeofday(&start_##label, NULL);
+    start_##label = MPI_Wtime();
 
 #define TOTAL_TIMER_STOP(label) \
-    gettimeofday(&end_##label, NULL); \
-    duration_##label = (end_##label.tv_sec - start_##label.tv_sec) + \
-                       (end_##label.tv_usec - start_##label.tv_usec) / 1e6; \
-    // printf("\n*** " #label " execution time: %f s ***\n", duration_##label);
-
-#define GET_DURATION(label) \
-    printf("%f", duration_##label);
+    end_##label = MPI_Wtime(); \
+    duration_##label = end_##label - start_##label; \
+    int _rank; MPI_Comm_rank(MPI_COMM_WORLD, &_rank); \
+    if (_rank == 0) printf("\n*** " #label " execution time: %f s ***\n", duration_##label);
 
 #endif
+
 #endif // __TIMING_H__
