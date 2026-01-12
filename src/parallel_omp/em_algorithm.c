@@ -6,59 +6,36 @@
 #include "../include/matrix_utils.h"
 #include "../include/commons.h"
 
+// -------------------- E-Step --------------------
 void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     T* temp_class_resp = (T*)calloc(num_clusters, sizeof(T));
 
-    #pragma omp parallel
-    {
-        int tid = omp_get_thread_num();
-        T* local_resp = &thread_class_resp[tid * num_clusters];
-
-        // init locale
-        for(int k = 0; k < num_clusters; k++)
-            local_resp[k] = 0.0;
-
-        #pragma omp for schedule(static)
-        for(int i = 0; i < num_data_points; i++) {
-            T norm = 0.0;
-            int row_offset = i * num_clusters;
-            int data_offset = i * dim;
+    #pragma omp parallel for reduction(+:temp_class_resp[:num_clusters])
+    for(int i = 0; i < num_data_points; i++) { 
+        T norm = 0.0;
+        int row_offset = i * num_clusters;
+        int data_offset = i * dim;
 
         for(int k = 0; k < num_clusters; k++) {
+            // Passiamo l'indirizzo dell'inizio del vettore i-esimo
             T pdf = multiv_gaussian_pdf(&data_points[data_offset], dim, gmm[k].mean, gmm[k].cov); 
             resp[row_offset + k] = gmm[k].weight * pdf;
             norm += resp[row_offset + k];
         }
 
-            for(int k = 0; k < num_clusters; k++) {
-                T r = resp[row_offset + k] * inv_norm;
-                resp[row_offset + k] = r;
-                local_resp[k] += r;
-            }
-        }
+        for(int k = 0; k < num_clusters; k++) { 
+            resp[row_offset + k] /= (norm + 1e-18);
+            temp_class_resp[k] += resp[row_offset + k];
+        } 
     }
 
-    // riduzione finale
     for(int k = 0; k < num_clusters; k++) {
-        T sum = 0.0;
-        for(int t = 0; t < nthreads; t++)
-            sum += thread_class_resp[t * num_clusters + k];
-
-        gmm[k].class_resp = sum;
+        gmm[k].class_resp = temp_class_resp[k];
     }
-
-    free(thread_class_resp);
+    free(temp_class_resp);
 }
 
-void m_step(T* data_points, int dim, int num_data_points,
-            Gaussian* gmm, int num_clusters, T* resp)
-{
-    int nthreads = omp_get_max_threads();
-
-    // buffer privati
-    T* thread_mean = (T*) malloc(nthreads * dim * sizeof(T));
-    T* thread_cov  = (T*) malloc(nthreads * dim * dim * sizeof(T));
-
+void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     for(int k = 0; k < num_clusters; k++) {
         gmm[k].weight = gmm[k].class_resp / num_data_points;
         T inv_class_resp = 1.0 / (gmm[k].class_resp + 1e-18);
@@ -75,8 +52,11 @@ void m_step(T* data_points, int dim, int num_data_points,
             }
         }
 
+        // Normalizzazione finale
         for (int d = 0; d < dim; d++) current_mean[d] *= inv_class_resp;
 
+        // --- 2. Update Covariance ---
+        // Usiamo un array d'appoggio locale al cluster k per la reduction
         T* temp_cov = (T*)calloc(dim * dim, sizeof(T));
 
         #pragma omp parallel for reduction(+:temp_cov[:dim*dim])
@@ -86,39 +66,33 @@ void m_step(T* data_points, int dim, int num_data_points,
             for(int i = 0; i < dim; i++) {
                 T diff_i = data_points[n_offset + i] - current_mean[i];
                 for(int j = i; j < dim; j++) {
+                    // Calcoliamo solo la parte triangolare superiore
                     temp_cov[i * dim + j] += r * diff_i * (data_points[n_offset + j] - current_mean[j]);
                 }
             }
         }
 
+        // Copia finale nella matrice del GMM e regolarizzazione
         for(int i = 0; i < dim; i++) {
             for(int j = i; j < dim; j++) {
-                T sum = 0.0;
-                for(int t = 0; t < nthreads; t++)
-                    sum += thread_cov[t * dim * dim + i * dim + j];
-
-                T val = sum * inv_class_resp;
+                T val = temp_cov[i * dim + j] * inv_class_resp;
                 gmm[k].cov[i][j] = val;
-                gmm[k].cov[j][i] = val;
-                gmm[k].cov[j][i] = val;
+                gmm[k].cov[j][i] = val; // Simmetria
             }
             gmm[k].cov[i][i] += 1e-6;
         }
+        free(temp_cov);
     }
-
-    free(thread_mean);
-    free(thread_cov);
 }
-
-
 void em_algorithm(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels) {
     T* resp = (T*)malloc(num_data_points * num_clusters * sizeof(T));
     T prev_log_likelihood = -INFINITY;
 
     for(int iter = 0; iter < MAX_ITER; iter++){
- 
+        // E-step
         e_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
 
+        // M-step
         m_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
 
         double log_lik = log_likelihood(data_points, dim, num_data_points, gmm, num_clusters);
