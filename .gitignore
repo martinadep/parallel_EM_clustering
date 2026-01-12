@@ -1,5 +1,8 @@
 /build
 .vscode
+/results
 !/results/plots
 /results/plots/*
 !/results/plots/em_plots_sample.pdf
+/datasets
+CMakeLists.txt
