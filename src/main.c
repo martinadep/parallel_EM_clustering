@@ -4,12 +4,12 @@
 #include <time.h>
 #include <string.h>
 #include <omp.h>
-#include "../include/commons.h"
-#include "../include/matrix_utils.h"
-#include "../include/utils.h"
+#include "include/commons.h"
+#include "include/matrix_utils.h"
+#include "include/utils.h"
 
 #ifdef TOTAL_TIMING
-#include "../include/timing/timing.h"
+#include "include/timing/timing.h"
 #endif
 
 
