@@ -1,0 +1,16 @@
+[DEBUG] Convergence reached at iteration 14.
+50000, 10, 6, 1, 263.562489
+[DEBUG] Convergence reached at iteration 5.
+50000, 10, 6, 2, 196.062282
+[DEBUG] Convergence reached at iteration 6.
+50000, 10, 6, 4, 198.472550
+[DEBUG] Convergence reached at iteration 5.
+50000, 10, 6, 8, 80.947526
+[DEBUG] Convergence reached at iteration 5.
+50000, 10, 6, 16, 48.275987
+[DEBUG] Convergence reached at iteration 5.
+50000, 10, 6, 32, 25.736044
+[DEBUG] Convergence reached at iteration 5.
+50000, 10, 6, 64, 13.654974
+[DEBUG] Convergence reached at iteration 5.
+50000, 10, 6, 96, 9.875465
