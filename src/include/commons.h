@@ -19,7 +19,7 @@ typedef struct {
 } Gaussian;
 
 T multiv_gaussian_pdf(T* x, int dim, T* means, T** cov_matrix);
-void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels);
-T log_likelihood(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters);
+void em_algorithm(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels);
+T log_likelihood(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters);
 
 #endif

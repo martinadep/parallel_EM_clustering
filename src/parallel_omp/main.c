@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
     parsing(argc, argv, &K, dataset_path, output_path);
 
-    T** dataset = load_csv(dataset_path, &N, &dim);
+    T* dataset = load_csv(dataset_path, &N, &dim);
     if (!dataset) {
         printf("Failed to load dataset\n");
         return 1;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     }
     free(gmm);
     free(labels);
-    free_matrix(dataset, N);
+    free(dataset);
 
     return 0;
 }

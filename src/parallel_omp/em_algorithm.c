@@ -7,74 +7,70 @@
 #include "../include/commons.h"
 
 // -------------------- E-Step --------------------
-void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
-    // Temporary array for class_resp
+void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     T* temp_class_resp = (T*)calloc(num_clusters, sizeof(T));
 
-    for(int k = 0; k < num_clusters; k++) {
-        gmm[k].class_resp = 0.0;
-    }
-
     #pragma omp parallel for reduction(+:temp_class_resp[:num_clusters])
-    for(int i = 0; i < num_data_points; i++){ 
+    for(int i = 0; i < num_data_points; i++) { 
         T norm = 0.0;
-        
-        // Calculate PDF and unnormalized responsibility
-        for(int k = 0; k < num_clusters; k++){
-            T pdf = multiv_gaussian_pdf(data_points[i], dim, gmm[k].mean, gmm[k].cov); 
-            resp[i][k] = gmm[k].weight * pdf;
-            norm += resp[i][k];
+        int row_offset = i * num_clusters;
+        int data_offset = i * dim;
+
+        for(int k = 0; k < num_clusters; k++) {
+            // Passiamo l'indirizzo dell'inizio del vettore i-esimo
+            T pdf = multiv_gaussian_pdf(&data_points[data_offset], dim, gmm[k].mean, gmm[k].cov); 
+            resp[row_offset + k] = gmm[k].weight * pdf;
+            norm += resp[row_offset + k];
         }
 
-        // Normalization and accumulation in temp_class_resp
-        for(int k = 0; k < num_clusters; k++){ 
-            resp[i][k] /= norm;
-            temp_class_resp[k] += resp[i][k];
+        for(int k = 0; k < num_clusters; k++) { 
+            resp[row_offset + k] /= (norm + 1e-18);
+            temp_class_resp[k] += resp[row_offset + k];
         } 
     }
 
-    // Copy the final results into the structure array
     for(int k = 0; k < num_clusters; k++) {
         gmm[k].class_resp = temp_class_resp[k];
     }
-
     free(temp_class_resp);
 }
 
-void m_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {
+void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     for(int k = 0; k < num_clusters; k++) {
-        // 1. Update weights 
         gmm[k].weight = gmm[k].class_resp / num_data_points;
+        T inv_class_resp = 1.0 / (gmm[k].class_resp + 1e-18);
 
-        // 2. Update means
+        // Update means
+        #pragma omp parallel for
         for (int d = 0; d < dim; d++) {
             T sum_mean = 0.0;
-            #pragma omp parallel for reduction(+:sum_mean)
             for (int i = 0; i < num_data_points; i++) {
-                sum_mean += resp[i][k] * data_points[i][d];
+                sum_mean += resp[i * num_clusters + k] * data_points[i * dim + d];
             }
-            gmm[k].mean[d] = sum_mean / gmm[k].class_resp;
+            gmm[k].mean[d] = sum_mean * inv_class_resp;
         }
 
-        // 3. Update covariance matrices
+        // Update covariance (Sfruttando la simmetria e array 1D)
+        #pragma omp parallel for
         for(int i = 0; i < dim; i++) {
-            for(int j = 0; j < dim; j++) {
+            for(int j = i; j < dim; j++) { // Solo metà superiore
                 T sum_cov = 0.0;
-                #pragma omp parallel for reduction(+:sum_cov)
                 for(int n = 0; n < num_data_points; n++) {
-                    T diff_i = data_points[n][i] - gmm[k].mean[i];
-                    T diff_j = data_points[n][j] - gmm[k].mean[j];
-                    sum_cov += resp[n][k] * diff_i * diff_j;
+                    T diff_i = data_points[n * dim + i] - gmm[k].mean[i];
+                    T diff_j = data_points[n * dim + j] - gmm[k].mean[j];
+                    sum_cov += resp[n * num_clusters + k] * diff_i * diff_j;
                 }
-                gmm[k].cov[i][j] = sum_cov / gmm[k].class_resp;
+                T final_val = sum_cov * inv_class_resp;
+                gmm[k].cov[i][j] = final_val;
+                gmm[k].cov[j][i] = final_val; // Simmetria
             }
             gmm[k].cov[i][i] += 1e-6; // Regularization
         }
     }
 }
 
-void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels) {
-    T** resp = alloc_matrix(num_data_points, num_clusters); // Responsibility matrix
+void em_algorithm(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, int* labels) {
+    T* resp = (T*)malloc(num_data_points * num_clusters * sizeof(T));
     T prev_log_likelihood = -INFINITY;
 
     for(int iter = 0; iter < MAX_ITER; iter++){
@@ -96,11 +92,13 @@ void em_algorithm(T** data_points, int dim, int num_data_points, Gaussian* gmm, 
     #pragma omp parallel for
     for (int n = 0; n < num_data_points; n++) {
         int max_k = 0;
-        for (int k = 1; k < num_clusters; k++)
-            if (resp[n][k] > resp[n][max_k])
+        int offset = n * num_clusters;
+        for (int k = 1; k < num_clusters; k++) {
+            if (resp[offset + k] > resp[offset + max_k])
                 max_k = k;
+        }
         labels[n] = max_k;
     }
 
-    free_matrix(resp, num_data_points);
+    free(resp);
 }
