@@ -8,7 +8,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
-DATA_DIR="${ROOT_DIR}/datasets"
+DATA_DIR="${ROOT_DIR}/datasets/test"
 LABELS_DIR="${DATA_DIR}/labels"
 RESULTS_DIR="${ROOT_DIR}/results"
 PLOTS_DIR="${RESULTS_DIR}/plots"
@@ -50,7 +50,7 @@ fi
 echo
 
 # 2) Generate dataset if necessary
-if [ ! -f "${DATASET_PATH}" ] || [ ! -f "${LABELS_PATH}" ]; then
+if [ ! -f "${DATASET_PATH}" ]; then
     echo "[2/4] Generating dataset..."
     if command -v Rscript >/dev/null 2>&1; then
         Rscript "${ROOT_DIR}/generator_and_analysis/data_generator.R" "${N}" "${K}" "${D}"
