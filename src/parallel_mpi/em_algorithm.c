@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <mpi.h>
 
-#include "include/matrix_utils.h"
-#include "include/commons.h"
+#include "../include/matrix_utils.h"
+#include "../include/commons.h"
 
 // E-Step: computes responsibilities for local data points
 void e_step(T** data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T** resp) {

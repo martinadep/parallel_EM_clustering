@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h> // MPI Include
-#include "include/commons.h"
-#include "include/matrix_utils.h"
-#include "include/utils.h"
+#include "../include/commons.h"
+#include "../include/matrix_utils.h"
+#include "../include/utils.h"
 
 #ifdef TOTAL_TIMING
-#include "include/timing/timing.h"
+#include "../include/timing/timing.h"
 #endif
 
 int main(int argc, char *argv[]) {
