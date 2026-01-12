@@ -6,3 +6,4 @@
 !/results/plots/em_plots_sample.pdf
 /datasets
 CMakeLists.txt
+.DS_Store
