@@ -8,7 +8,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
-DATA_DIR="${ROOT_DIR}/datasets"
+DATA_DIR="${ROOT_DIR}/datasets/test"
 LABELS_DIR="${DATA_DIR}/labels"
 RESULTS_DIR="${ROOT_DIR}/results"
 PLOTS_DIR="${RESULTS_DIR}/plots"
