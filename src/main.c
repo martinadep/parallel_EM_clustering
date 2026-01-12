@@ -10,7 +10,7 @@
 #endif
 
 int main(int argc, char *argv[]) {
-    MPI_Init(&argc, &argv); // Initialize MPI environment
+    MPI_Init(&argc, &argv); 
 
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
     int N, dim, K;
     char dataset_path[256], output_path[256];
     T** dataset = NULL;
-    T* flat_dataset = NULL; // Contiguous buffer for sending data
+    T* flat_dataset = NULL; // contiguous buffer for sending data
 
-    // Master process reads the dataset
+    // master process reads the dataset
     if (rank == 0) {
         parsing(argc, argv, &K, dataset_path, output_path);
         dataset = load_csv(dataset_path, &N, &dim);
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         }
         printf("[MPI Master] Loaded dataset: %d points, %d coordinates\n", N, dim);
 
-        // Flatten the dataset for MPI_Scatter
+        // flatten the dataset for MPI_Scatter
         flat_dataset = (T*)malloc(N * dim * sizeof(T));
         for(int i=0; i<N; i++) {
             for(int j=0; j<dim; j++) {
@@ -40,33 +40,31 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Broadcast problem dimensions to all processes
+    // broadcast problem dimensions to all processes
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&dim, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&K, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // Calculate local data size
-    // Note: Assuming N is divisible by size for simplicity.
-    // In production, use MPI_Scatterv to handle remainders.
+    // calculate local data size, assuming N is divisible by size for simplicity.
     int local_N = N / size; 
     T* local_flat_data = (T*)malloc(local_N * dim * sizeof(T));
 
-    // Distribute data chunks to all processes
+    // distribute data chunks to all processes
     MPI_Scatter(flat_dataset, local_N * dim, MPI_DOUBLE, 
                 local_flat_data, local_N * dim, MPI_DOUBLE, 
                 0, MPI_COMM_WORLD);
 
-    // Reconstruct local 2D array structure (array of pointers)
+    // reconstruct local 2D array structure (array of pointers)
     T** local_dataset = (T**)malloc(local_N * sizeof(T*));
     for(int i=0; i<local_N; i++) {
         local_dataset[i] = &local_flat_data[i * dim];
     }
 
-    // Setup GMM structures
+    // setup GMM structures
     Gaussian *gmm = (Gaussian*)malloc(K * sizeof(Gaussian));
     int *local_labels = (int*)malloc(local_N * sizeof(int));
     
-    // Master initializes GMM parameters, others allocate memory
+    // master initializes GMM parameters, others allocate memory
     if (rank == 0) {
         init_gmm(gmm, K, dim, dataset, N);
     } else {
@@ -76,12 +74,12 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // Broadcast initial GMM parameters to all processes
+    // broadcast initial GMM parameters to all processes
     for(int k=0; k<K; k++) {
         MPI_Bcast(gmm[k].mean, dim, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         MPI_Bcast(&gmm[k].weight, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         
-        // Serialize covariance matrix for broadcasting
+        // serialize covariance matrix for broadcasting
         T* flat_cov = (T*)malloc(dim*dim*sizeof(T));
         if(rank == 0) {
             for(int i=0; i<dim; i++)
@@ -98,16 +96,15 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // ********** EM Algorithm Execution ************
+    // EM Algorithm Execution 
     TOTAL_TIMER_START(EM_Algorithm)
 
-    // Run EM algorithm on local data chunk
+    // run EM algorithm on local data chunk
     em_algorithm(local_dataset, dim, local_N, gmm, K, local_labels);
 
     TOTAL_TIMER_STOP(EM_Algorithm)
-    // **********************************************
     
-    // Collect results (labels) from all processes to Master
+    // collect results (labels) from all processes to master
     int *all_labels = NULL;
     if (rank == 0) {
         all_labels = (int*)malloc(N * sizeof(int));
@@ -116,7 +113,7 @@ int main(int argc, char *argv[]) {
                all_labels, local_N, MPI_INT, 
                0, MPI_COMM_WORLD);
 
-    // Master prints and saves results
+    // master prints and saves results
     if (rank == 0) {
         printf("\nCluster Parameters:\n");
         printf("%-7s | %-8s | %s\n", "Cluster", "Weight", "Mean");
@@ -135,12 +132,12 @@ int main(int argc, char *argv[]) {
         free_matrix(dataset, N);
     }
 
-    // Cleanup local memory
+    // cleanup local memory
     free(local_flat_data);
-    free(local_dataset); // Frees the array of pointers, data is in local_flat_data
+    free(local_dataset); // frees the array of pointers, data is in local_flat_data
     free(local_labels);
     
-    // Free GMM memory
+    // free GMM memory
     for (int k = 0; k < K; k++) {
         free(gmm[k].mean);
         free_matrix(gmm[k].cov, dim);
