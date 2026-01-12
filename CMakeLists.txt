@@ -37,12 +37,12 @@ target_link_libraries(em_clustering m)
 
 # Parallel OpenMP version
 set(PARALLEL_SOURCES
-    src/parallel_omp/main.c
+    src/main.c
     src/utils.c
     src/matrix/matrix_inverse_lu.c
     src/matrix/matrix_utils.c
     src/multiv_gaussian.c
-    src/parallel_omp/em_algorithm.c
+    src/em_algorithm.c
     src/log_likelihood.c
 )
 
