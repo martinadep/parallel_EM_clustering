@@ -6,7 +6,6 @@
 #include "../include/matrix_utils.h"
 #include "../include/commons.h"
 
-// -------------------- E-Step --------------------
 void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     T* temp_class_resp = (T*)calloc(num_clusters, sizeof(T));
 
@@ -17,7 +16,6 @@ void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
         int data_offset = i * dim;
 
         for(int k = 0; k < num_clusters; k++) {
-            // Passiamo l'indirizzo dell'inizio del vettore i-esimo
             T pdf = multiv_gaussian_pdf(&data_points[data_offset], dim, gmm[k].mean, gmm[k].cov); 
             resp[row_offset + k] = gmm[k].weight * pdf;
             norm += resp[row_offset + k];
@@ -52,11 +50,8 @@ void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
             }
         }
 
-        // Normalizzazione finale
         for (int d = 0; d < dim; d++) current_mean[d] *= inv_class_resp;
 
-        // --- 2. Update Covariance ---
-        // Usiamo un array d'appoggio locale al cluster k per la reduction
         T* temp_cov = (T*)calloc(dim * dim, sizeof(T));
 
         #pragma omp parallel for reduction(+:temp_cov[:dim*dim])
@@ -66,18 +61,16 @@ void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
             for(int i = 0; i < dim; i++) {
                 T diff_i = data_points[n_offset + i] - current_mean[i];
                 for(int j = i; j < dim; j++) {
-                    // Calcoliamo solo la parte triangolare superiore
                     temp_cov[i * dim + j] += r * diff_i * (data_points[n_offset + j] - current_mean[j]);
                 }
             }
         }
 
-        // Copia finale nella matrice del GMM e regolarizzazione
         for(int i = 0; i < dim; i++) {
             for(int j = i; j < dim; j++) {
                 T val = temp_cov[i * dim + j] * inv_class_resp;
                 gmm[k].cov[i][j] = val;
-                gmm[k].cov[j][i] = val; // Simmetria
+                gmm[k].cov[j][i] = val;
             }
             gmm[k].cov[i][i] += 1e-6;
         }
@@ -89,10 +82,9 @@ void em_algorithm(T* data_points, int dim, int num_data_points, Gaussian* gmm, i
     T prev_log_likelihood = -INFINITY;
 
     for(int iter = 0; iter < MAX_ITER; iter++){
-        // E-step
+ 
         e_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
 
-        // M-step
         m_step(data_points, dim, num_data_points, gmm, num_clusters, resp);
 
         double log_lik = log_likelihood(data_points, dim, num_data_points, gmm, num_clusters);
