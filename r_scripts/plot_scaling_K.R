@@ -5,9 +5,9 @@ library(readr)
 # ==============================================================================
 # CONFIGURAZIONE FILE
 # ==============================================================================
-file_k5  <- "results/scaling_Ptest_K5_1.csv"
-file_k10 <- "results/scaling_Ptest_K10_2.csv"
-file_k15 <- "results/scaling_Ptest_K15_1.csv"
+file_k5  <- "results/omp/scaling_Ptest_K5_1.csv"
+file_k10 <- "results/omp/scaling_Ptest_K10_1.csv"
+file_k15 <- "results/omp/scaling_Ptest_K15_1.csv"
 
 # ==============================================================================
 # CARICAMENTO DATI
@@ -95,10 +95,9 @@ p_time <- ggplot(df_metrics, aes(x = Cores, y = Time_Sec, color = K_Label, group
 # ==============================================================================
 # SALVATAGGIO
 # ==============================================================================
-dir.create("results/plots", showWarnings = FALSE)
+dir.create("results/plots/omp", showWarnings = FALSE)
 
-ggsave("results/plots/scaling_K_speedup.png", plot = p_speedup, width = 8, height = 6, dpi = 300)
-ggsave("results/plots/scaling_K_efficiency.png", plot = p_efficiency, width = 8, height = 6, dpi = 300)
-ggsave("results/plots/scaling_K_time.png", plot = p_time, width = 8, height = 6, dpi = 300)
-
-cat("Grafici salvati in results/plots/\n")
+ggsave("results/plots/omp/scaling_K_speedup.png", plot = p_speedup, width = 8, height = 6, dpi = 300)
+ggsave("results/plots/omp/scaling_K_efficiency.png", plot = p_efficiency, width = 8, height = 6, dpi = 300)
+ggsave("results/plots/omp/scaling_K_time.png", plot = p_time, width = 8, height = 6, dpi = 300)
+cat("Grafici salvati in results/plots/omp/\n")

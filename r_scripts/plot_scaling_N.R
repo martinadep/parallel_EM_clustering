@@ -6,9 +6,9 @@ library(readr)
 # CONFIGURAZIONE FILE
 # ==============================================================================
 # Percorsi relativi alla root del progetto
-file_200k <- "results/scaling_Ptest_200k_1.csv"
-file_300k <- "results/scaling_Ptest_300k_1.csv"
-file_500k <- "results/scaling_Ptest_500k_1.csv"
+file_200k <- "results/omp/scaling_Ptest_200k_1.csv"
+file_300k <- "results/omp/scaling_Ptest_300k_1.csv"
+file_500k <- "results/omp/scaling_Ptest_500k_1.csv"
 
 # ==============================================================================
 # CARICAMENTO DATI
@@ -120,10 +120,10 @@ p_time <- ggplot(df_metrics, aes(x = Cores, y = Time_Sec, color = Dataset, group
 # ==============================================================================
 # SALVATAGGIO
 # ==============================================================================
-dir.create("results/plots", showWarnings = FALSE)
+dir.create("results/plots/omp", showWarnings = FALSE)
 
-ggsave("results/plots/scaling_N_speedup.png", plot = p_speedup, width = 8, height = 6, dpi = 300)
-ggsave("results/plots/scaling_N_efficiency.png", plot = p_efficiency, width = 8, height = 6, dpi = 300)
-ggsave("results/plots/scaling_N_time.png", plot = p_time, width = 8, height = 6, dpi = 300)
+ggsave("results/plots/omp/scaling_N_speedup.png", plot = p_speedup, width = 8, height = 6, dpi = 300)
+ggsave("results/plots/omp/scaling_N_efficiency.png", plot = p_efficiency, width = 8, height = 6, dpi = 300)
+ggsave("results/plots/omp/scaling_N_time.png", plot = p_time, width = 8, height = 6, dpi = 300)
 
-cat("Grafici salvati in results/plots/\n")
+cat("Grafici salvati in results/plots/omp/\n")

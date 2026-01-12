@@ -6,9 +6,9 @@ library(readr)
 # CONFIGURAZIONE FILE
 # ==============================================================================
 # Percorsi relativi alla root del progetto
-file_d6 <- "results/scaling_Ptest_D6_1.csv"
-file_d7 <- "results/scaling_Ptest_D7_1.csv"
-file_d8 <- "results/scaling_Ptest_D8_1.csv"
+file_d6 <- "results/omp/scaling_Ptest_D6_1.csv"
+file_d7 <- "results/omp/scaling_Ptest_D7_1.csv"
+file_d8 <- "results/omp/scaling_Ptest_D8_1.csv"
 
 # ==============================================================================
 # CARICAMENTO DATI
@@ -120,8 +120,8 @@ p_time <- ggplot(df_metrics, aes(x = Cores, y = Time_Sec, color = Dimensions, gr
 # SALVATAGGIO
 # ==============================================================================
 
-output_dir <- "results/plots"
-if(!dir.exists("results") && dir.exists("../results")) output_dir <- "../results/plots"
+output_dir <- "results/plots/omp"
+if(!dir.exists("results") && dir.exists("../results")) output_dir <- "../results/plots/omp"
 dir.create(output_dir, showWarnings = FALSE)
 
 cat(paste("Salvataggio grafici in", output_dir, "...\n"))
