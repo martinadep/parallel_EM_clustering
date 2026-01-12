@@ -1,71 +1,74 @@
 #!/bin/bash
-# run_interactive_test.sh
-# Script per testare scaling K=5 in sessione interattiva
+# run_interactive_test.sh (OpenMP + Output Visibile)
 
 # 1. Carica i moduli (necessario se è una nuova shell)
-module load gcc91 openmpi-4.0.4
+module load gcc91 openmpi-4.0.4 2>/dev/null || echo "Module load skipped"
 
 # 2. Imposta i percorsi relativi alla directory corrente
 PROJECT_ROOT=$(pwd)
 EXEC_PATH="$PROJECT_ROOT/build/em_clustering"
 DATASET="$PROJECT_ROOT/datasets/test/gmm_P50000_K5_D6.csv"
-RESULT_CSV="$PROJECT_ROOT/results/interactive_results_K5.csv"
+RESULT_CSV="$PROJECT_ROOT/results/interactive_results_K5_OMP.csv"
 
 # Parametri
 K_CLUSTERS=5
 
 echo "=========================================="
-echo "STARTING INTERACTIVE TEST (K=$K_CLUSTERS)"
-echo "Exe: $EXEC_PATH"
-echo "Data: $DATASET"
+echo "STARTING INTERACTIVE TEST (OpenMP, K=$K_CLUSTERS)"
 echo "=========================================="
 
 # Verifica esistenza eseguibile
 if [ ! -f "$EXEC_PATH" ]; then
     echo "ERRORE: Eseguibile non trovato in $EXEC_PATH"
-    echo "Prova a ricompilare o spostarti nella root del progetto."
     exit 1
 fi
 
 mkdir -p "$PROJECT_ROOT/results"
+# Inizializza CSV se non esiste
 if [ ! -f "$RESULT_CSV" ]; then
-    echo "Cores,N_Points,K_Clusters,Dimensions,Time_Sec" > "$RESULT_CSV"
+    echo "N_Points,K_Clusters,Dimensions,Threads,Time_Sec" > "$RESULT_CSV"
 fi
 
-run_test() {
-    CORES=$1
-    echo ""
-    echo ">>> Testing with $CORES CORES..."
-    
-    TMP_LOG="interactive_run_${CORES}.log"
-    
-    # Esegue MPI mostrando l'output a video E salvandolo nel log temporaneo
-    # Usa --oversubscribe perché la sessione interattiva potrebbe avere meno core fisici di 64
-    mpirun --oversubscribe \
-           --mca mca_base_component_show_load_errors 0 \
-           --mca btl ^openib \
-           --mca btl_base_warn_component_unused 0 \
-           -np $CORES "$EXEC_PATH" -d "$DATASET" -k $K_CLUSTERS -o /dev/null 2>&1 | tee "$TMP_LOG"
-    
-    # Estrae i dati per il CSV
-    TIME=$(grep "EM_Algorithm execution time" "$TMP_LOG" | awk '{print $5}')
-    N_PTS=$(grep "Loaded dataset" "$TMP_LOG" | awk '{print $5}')
-    D_DIM=$(grep "Loaded dataset" "$TMP_LOG" | awk '{print $7}')
-    
-    if [ -z "$TIME" ]; then TIME="ERR"; fi
-    if [ -z "$N_PTS" ]; then N_PTS="Missing"; fi
+# Variabili per silenziare warning OpenMPI residui (se presenti)
+export OMPI_MCA_mca_base_component_show_load_errors=0
+export PMIX_MCA_mca_base_component_show_load_errors=0
 
-    echo "$CORES,$N_PTS,$K_CLUSTERS,$D_DIM,$TIME" >> "$RESULT_CSV"
+run_test() {
+    THREADS=$1
+    echo ""
+    echo ">>> Testing with $THREADS THREADS..."
     
-    # Pulizia
+    # Imposta numero thread OpenMP
+    export OMP_NUM_THREADS=$THREADS
+    TMP_LOG="temp_run_${THREADS}.log"
+
+    # USA TEE: Mostra output a video E lo salva nel log
+    "$EXEC_PATH" -d "$DATASET" -k $K_CLUSTERS -o /dev/null 2>&1 | tee "$TMP_LOG"
+    
+    # Prende l'ultima riga (assumendo sia quella CSV prodotta dal main)
+    CSV_LINE=$(tail -n 1 "$TMP_LOG")
+    
+    # Controllo e salvataggio
+    if [[ "$CSV_LINE" =~ ^[0-9]+ ]]; then
+         echo "$CSV_LINE" >> "$RESULT_CSV"
+    else
+         echo "WARNING: Formato output non riconosciuto nell'ultima riga."
+    fi
+    
     rm "$TMP_LOG"
 }
 
 # Esegui il loop
-for c in 1 2 4 8 16 32 64; do 
-    run_test $c
-    # Piccola pausa per leggere l'output se necessario
-    sleep 1
+# Rileva core logici disponibili per evitare oversubscription inutile (opzionale)
+MAX_CORES=$(nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 64)
+echo "Detected max cores: $MAX_CORES"
+
+for t in 1 2 4 8 16 32 64; do 
+    # (Opzionale) Decommenta per fermarti al numero max di core fisici
+    # if [ "$t" -gt "$MAX_CORES" ]; then break; fi
+    
+    run_test $t
+    sleep 0.5
 done
 
 echo ""

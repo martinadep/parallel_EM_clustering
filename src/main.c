@@ -47,29 +47,35 @@ int main(int argc, char *argv[]) {
     TOTAL_TIMER_STOP(EM_Algorithm)
     // **********************************************
 
+    // Print and save results
+    // Decommentato per mostrare i cluster
+    printf("\nCluster Parameters:\n");
+    printf("%-7s | %-8s | %s\n", "Cluster", "Weight", "Mean");
+    printf("%s\n", "--------+----------+-----------------------------");
+    for (int k = 0; k < K; k++) {
+         printf("%-7d | %-8.3f | [", k, gmm[k].weight);
+        for (int d = 0; d < dim; d++) {
+            printf("%.3f%s", gmm[k].mean[d], d < dim-1 ? ", " : "");
+        }
+        printf("]\n");
+    }
+    // write_results_csv(output_path, dataset, labels, N, dim); // Tieni questo se vuoi scrivere il file vero full
+    
+    // --- STAMPA CSV TEMPI (SPOSTATO ALLA FINE) ---
+    // Così "tail -n 1" nello script bash prenderà questa riga
     #pragma omp parallel
     {
         #pragma omp master
         {
+            // Stampa anche un separatore vuoto prima per sicurezza
+            printf("\n"); 
             printf("%d, %d, %d, %d, ", N, K, dim, omp_get_num_threads());
             GET_DURATION(EM_Algorithm)
             printf("\n");
         }
     }
-    
-    // Print and save results
-    // printf("\nCluster Parameters:\n");
-    // printf("%-7s | %-8s | %s\n", "Cluster", "Weight", "Mean");
-    // printf("%s\n", "--------+----------+-----------------------------");
-    // for (int k = 0; k < K; k++) {
-    //     // printf("%-7d | %-8.3f | [", k, gmm[k].weight);
-    //     for (int d = 0; d < dim; d++) {
-    //         printf("%.3f%s", gmm[k].mean[d], d < dim-1 ? ", " : "");
-    //     }
-    //     printf("]\n");
-    // }
-    // write_results_csv(output_path, dataset, labels, N, dim);
-    
+    // ---------------------------------------------
+
     // Cleanup
     #pragma omp parallel for
     for (int k = 0; k < K; k++) {
