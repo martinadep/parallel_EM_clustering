@@ -11,7 +11,7 @@ module load gcc91 openmpi-4.0.4
 
 # define absolute paths based on the submission directory
 PROJECT_ROOT=$PBS_O_WORKDIR
-EXEC_PATH="$PROJECT_ROOT/build/em_clustering"
+EXEC_PATH="$PROJECT_ROOT/build/em_clustering_mpi"
 DATASET="$PROJECT_ROOT/datasets/test/gmm_P200000_K5_D6.csv"
 RESULT_CSV="$PROJECT_ROOT/results/scaling_Ptest_200k.csv"
 

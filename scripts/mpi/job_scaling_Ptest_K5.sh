@@ -6,7 +6,7 @@ module load gcc91 openmpi-4.0.4
 
 # set paths relative to the current directory
 PROJECT_ROOT=$(pwd)
-EXEC_PATH="$PROJECT_ROOT/build/em_clustering"
+EXEC_PATH="$PROJECT_ROOT/build/em_clustering_mpi"
 DATASET="$PROJECT_ROOT/datasets/test/gmm_P50000_K5_D6.csv"
 RESULT_CSV="$PROJECT_ROOT/results/interactive_results_K5.csv"
 

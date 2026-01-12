@@ -3,7 +3,9 @@ set -euo pipefail
 
 # Custom run script for EM clustering
 # Usage: ./custom_run.sh [N] [K] [D] [EXECUTABLE_NAME]
-# Example: ./custom_run.sh 100000 3 2 em_clustering
+# Example: ./custom_run.sh 100000 3 2 em_clustering_seq
+#          ./custom_run.sh 100000 3 2 em_clustering_omp
+#          ./custom_run.sh 100000 3 2 em_clustering_mpi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
@@ -16,7 +18,7 @@ PLOTS_DIR="${RESULTS_DIR}/plots"
 N=${1:-10000}          # Number of data points
 K=${2:-3}              # Number of clusters
 D=${3:-2}              # Dimensions
-EXECUTABLE=${4:-"em_clustering"}
+EXECUTABLE=${4:-"em_clustering_seq|}  # Default to sequential
 
 DATASET_NAME="gmm_P${N}_K${K}_D${D}"
 DATASET_PATH="${DATA_DIR}/${DATASET_NAME}.csv"
