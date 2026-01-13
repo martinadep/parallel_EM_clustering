@@ -73,7 +73,7 @@ Tested configurations:
 | `-k` | Number of clusters (required)         |
 | `-o` | Output file for results               |
 | `-m` | Max iterations (default: 100)         |
-| `-t` | Convergence threshold (default: 1e-4) |
+| `-t` | Convergence threshold (default: 1e-6) |
 
 
 ## Repository Structure
