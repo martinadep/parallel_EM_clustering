@@ -51,12 +51,12 @@ Tested configurations:
 
 3. **Run the algorithm**
    ```bash
-   mpirun -np 4 ./build/em_clustering \
+   mpirun -np 4 ./build/em_clustering_[version] \
        -d datasets/test/gmm_P50000_K5_D6.csv \
        -k 5 \
        -o results/output.csv
    ```
-   Or, using shell scripts in `scripts/mpi/`.
+   Or, using shell scripts in `scripts/mpi/` (recommended).
 
 4. **(Optional) Plot the results**
    ```bash
