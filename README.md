@@ -60,7 +60,7 @@ Tested configurations:
 
 4. **(Optional) Plot the results**
    ```bash
-   Rscript r_scripts/plot_em_results.R
+   Rscript generator_and_analysis/plot_em_results.R
    ```
 
 ## Usage
