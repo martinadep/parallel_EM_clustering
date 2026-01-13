@@ -84,7 +84,7 @@ Tested configurations:
 | `datasets/test/` | Test CSV datasets                       |
 | `results/`       | Benchmark output files                  |
 | `scripts/`   | PBS and interactive job scripts         |
-| `r_scripts/`     | R scripts for data generation & plotting|
+| `generator_and_analysis/`     | R scripts for data generation & plotting|
 
 ## Useful Scripts
 
