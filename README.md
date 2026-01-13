@@ -56,7 +56,7 @@ Tested configurations:
        -k 5 \
        -o results/output.csv
    ```
-   Or, using shell scripts in `scripts/mpi/` (recommended).
+   Or, using shell scripts in `scripts/` (recommended).
 
 4. **(Optional) Plot the results**
    ```bash
