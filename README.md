@@ -92,7 +92,7 @@ Several scripts are provided in the `scripts/` directory for running scaling tes
 
 | Script                      | Description                      |
 |-----------------------------|----------------------------------|
-| `job_scaling_Ptest_200k.sh` | Strong scaling test (N=200,000)  |
+| `job_scaling_Ptest_200k.sh` | Strong scaling test (N=200 000)  |
 | `job_scaling_Ptest_K10.sh`  | Scaling test varying K=10        |
 | `job_scaling_Ptest_D8.sh`   | Scaling test varying D=8         |
 
