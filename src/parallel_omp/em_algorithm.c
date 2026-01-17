@@ -6,7 +6,7 @@
 #include "../include/matrix_utils.h"
 #include "../include/commons.h"
 
-// -------------------- E-Step --------------------
+// E-step
 void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     T* temp_class_resp = (T*)calloc(num_clusters, sizeof(T));
 
@@ -17,7 +17,7 @@ void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
         int data_offset = i * dim;
 
         for(int k = 0; k < num_clusters; k++) {
-            // Passiamo l'indirizzo dell'inizio del vettore i-esimo
+            // Pass pointer to the start of the i-th vector
             T pdf = multiv_gaussian_pdf(&data_points[data_offset], dim, gmm[k].mean, gmm[k].cov); 
             resp[row_offset + k] = gmm[k].weight * pdf;
             norm += resp[row_offset + k];
@@ -35,6 +35,8 @@ void e_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
     free(temp_class_resp);
 }
 
+
+// M-step
 void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num_clusters, T* resp) {
     for(int k = 0; k < num_clusters; k++) {
         gmm[k].weight = gmm[k].class_resp / num_data_points;
@@ -52,11 +54,10 @@ void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
             }
         }
 
-        // Normalizzazione finale
+        // Final normalization
         for (int d = 0; d < dim; d++) current_mean[d] *= inv_class_resp;
 
-        // --- 2. Update Covariance ---
-        // Usiamo un array d'appoggio locale al cluster k per la reduction
+        // Update covariance matrix
         T* temp_cov = (T*)calloc(dim * dim, sizeof(T));
 
         #pragma omp parallel for reduction(+:temp_cov[:dim*dim])
@@ -66,18 +67,18 @@ void m_step(T* data_points, int dim, int num_data_points, Gaussian* gmm, int num
             for(int i = 0; i < dim; i++) {
                 T diff_i = data_points[n_offset + i] - current_mean[i];
                 for(int j = i; j < dim; j++) {
-                    // Calcoliamo solo la parte triangolare superiore
+                    // Compute only the upper triangular part
                     temp_cov[i * dim + j] += r * diff_i * (data_points[n_offset + j] - current_mean[j]);
                 }
             }
         }
 
-        // Copia finale nella matrice del GMM e regolarizzazione
+        // Final copy to GMM matrix and regularization
         for(int i = 0; i < dim; i++) {
             for(int j = i; j < dim; j++) {
                 T val = temp_cov[i * dim + j] * inv_class_resp;
                 gmm[k].cov[i][j] = val;
-                gmm[k].cov[j][i] = val; // Simmetria
+                gmm[k].cov[j][i] = val; // Symmetry
             }
             gmm[k].cov[i][i] += 1e-6;
         }
