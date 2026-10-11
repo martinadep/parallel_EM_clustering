@@ -98,5 +98,5 @@ Several scripts are provided in the `scripts/` directory for running scaling tes
 
 ## Authors
 
-- [Martina De Piccoli](https://github.com/martinadep), MSc in Data Science, University of Trento
+- [Martina De Piccoli](https://github.com/martinadep), MSc in Computer Science, University of Trento
 - [Jago Revrenna](https://github.com/jagorev), MSc in Cloud and Networking Infrastructures and HPC, University of Trento and KTH Royal Institute of Technology
